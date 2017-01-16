@@ -1,5 +1,6 @@
-
-
+//Compiler:
+//g++ -std=c++11 -pthread file_name.cpp
+	
 #include<iostream>
 #include <thread>
 
