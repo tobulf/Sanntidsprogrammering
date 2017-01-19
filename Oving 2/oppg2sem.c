@@ -12,42 +12,39 @@ sem_t mutex; // Declare a global variable mutex
 
 
 void* threadfuntion_1() {
-	for (int n = 0; n<1000000; n++) {
-		sem_wait(&mutex);
-		i++;
-		sem_post(&mutex);
-	}
-	return NULL;
+    for (int n = 0; n<1000000; n++) {
+        sem_wait(&mutex);
+        i++;
+        sem_post(&mutex);
+    }
+    return NULL;
 }
 
 void* threadfunction_2() {
-	for (int n = 0; n<1000000; n++) {
-		sem_wait(&mutex);
-		i--;
-		sem_post(&mutex);
-	}
-	return NULL;
+    for (int n = 0; n<1000000; n++) {
+        sem_wait(&mutex);
+        i--;
+        sem_post(&mutex);
+    }
+    return NULL;
 }
 
 
 
 int main() {
-	sem_init(&mutex, 0, 1); //Initialize mutex
+    sem_init(&mutex, 0, 1); //Initialize mutex
 
-	pthread_t thread_1;
-	pthread_t thread_2;
-	pthread_create(&thread_1, NULL, threadfuntion_1, NULL);
-	pthread_create(&thread_2, NULL, threadfunction_2, NULL);
+    pthread_t thread_1;
+    pthread_t thread_2;
+    pthread_create(&thread_1, NULL, threadfuntion_1, NULL);
+    pthread_create(&thread_2, NULL, threadfunction_2, NULL);
 
 
-	pthread_join(thread_1, NULL);
-	pthread_join(thread_2, NULL);
+    pthread_join(thread_1, NULL);
+    pthread_join(thread_2, NULL);
 
-	sem_destroy(&mutex); //Deletes mutex
+    sem_destroy(&mutex); //Deletes mutex
 
-	printf("%d\n", i);
-	return 0;
+    printf("%d\n", i);
+    return 0;
 }
-
-
-
