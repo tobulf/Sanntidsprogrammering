@@ -34,6 +34,9 @@ class Input:
     BUTTONS_DOWN            = [BUTTON_DOWN2, BUTTON_DOWN3, BUTTON_DOWN4]
     EXTERNAL_BUTTONS        = BUTTONS_UP + BUTTONS_DOWN
     SENSORS                 = [SENSOR_FLOOR1, SENSOR_FLOOR2, SENSOR_FLOOR3, SENSOR_FLOOR4]
+    N_FLOORS                = len(SENSORS)
+
+
 
 class Output:
     #out port 3
