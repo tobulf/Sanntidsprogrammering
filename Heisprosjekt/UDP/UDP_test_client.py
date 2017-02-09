@@ -1,16 +1,17 @@
-import UDP_driver
-import time
-port=(20020)
+from UDP_driver import UDP_SERVER
+from time import sleep
+
+port=(20010)
 
 
 
-client=UDP_driver.UDP_CLIENT(port)
+server=UDP_SERVER(port)
 
 while True:
-    client.listen()
-    if (client.connected):
-        print "connected to: ", client.serverAdress[0],client.serverAdress[1]
-    elif not (client.connected):
+    server.listen()
+    if (server.connected):
+        print "connected to: ", server.serverAdress[0],server.serverAdress[1]
+    elif not (server.connected):
     
-    	print "Currently Disconnected"
-    time.sleep(3)
+        print "Currently Disconnected"
+    sleep(1)
