@@ -33,8 +33,20 @@ class Input:
     BUTTONS_UP              = [BUTTON_UP1, BUTTON_UP2, BUTTON_UP3]
     BUTTONS_DOWN            = [BUTTON_DOWN2, BUTTON_DOWN3, BUTTON_DOWN4]
     EXTERNAL_BUTTONS        = BUTTONS_UP + BUTTONS_DOWN
+    ALL_BUTTONS             = EXTERNAL_BUTTONS + INTERNAL_BUTTONS
     SENSORS                 = [SENSOR_FLOOR1, SENSOR_FLOOR2, SENSOR_FLOOR3, SENSOR_FLOOR4]
+
+    BUTTON_MATRIX           = [[BUTTON_UP1,            0, BUTTON_COMMAND1],
+                               [BUTTON_UP2, BUTTON_DOWN2, BUTTON_COMMAND2],
+                               [BUTTON_UP3, BUTTON_DOWN3, BUTTON_COMMAND3],
+                               [         0, BUTTON_DOWN4, BUTTON_COMMAND4]]
+
+
     N_FLOORS                = len(SENSORS)
+    N_BUTTONS               = len(ALL_BUTTONS)
+
+
+
 
 
 
@@ -67,6 +79,12 @@ class Output:
     INTERNAL_LIGHTS         = [LIGHT_COMMAND1, LIGHT_COMMAND2, LIGHT_COMMAND3, LIGHT_COMMAND4]
     LIGHTS_UP               = [LIGHT_UP1, LIGHT_UP2, LIGHT_UP3]
     LIGHTS_DOWN             = [LIGHT_DOWN2, LIGHT_DOWN3, LIGHT_DOWN4]
+
+    LAMP_MATRIX             = [[LIGHT_UP1,           0, LIGHT_COMMAND1],
+                               [LIGHT_UP2, LIGHT_DOWN2, LIGHT_COMMAND2],
+                               [LIGHT_UP3, LIGHT_DOWN3, LIGHT_COMMAND3],
+                               [        0, LIGHT_DOWN4, LIGHT_COMMAND4]]
+
 
     #out port 0
     MOTOR                   = 0x100+0
