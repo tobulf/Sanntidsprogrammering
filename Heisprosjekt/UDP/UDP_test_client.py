@@ -10,8 +10,7 @@ server=UdpServer(port)
 while True:
     server.Listen()
     if (server.connected):
-        print "connected to: ", server.serverAdress[0],server.serverAdress[1]
+        print "connected to: ", server.ServerAddress[0],server.ServerAddress[1]
     elif not (server.connected):
-    
         print "Currently Disconnected"
     sleep(1)
