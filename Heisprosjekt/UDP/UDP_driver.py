@@ -1,7 +1,7 @@
 import socket
 import json
 
-class UDP_SERVER(object):
+class UdpServer(object):
     def __init__(self,PORT): #constructor, makes an socket named server.
         #Set up a UDP server:
         self.adress=('',PORT) #server own IP and PORT
@@ -12,7 +12,7 @@ class UDP_SERVER(object):
         self.serverAdress=("",0)
 
 
-    def listen(self):       #function to listen on UDP for the client
+    def Listen(self):       #function to listen on UDP for the client
         if self.connected:  #if it is connected, it checks the UDP message for "im alive" phrase.
             data=self.server.recv(1024)
             message=json.loads(data)
@@ -28,7 +28,7 @@ class UDP_SERVER(object):
 
 
 
-class UDP_CLIENT(object):
+class UdpClient(object):
     def __init__(self, adress, servingAdress):
         self.adress = adress
         self.servingAdress=servingAdress
@@ -37,7 +37,7 @@ class UDP_CLIENT(object):
         self.imAliveMsg=["im alive", servingAdress]
         self.servingServer=False
 
-    def heartbeat(self):  #function to send out heartbeat signal on UDP
+    def Heartbeat(self):  #function to send out heartbeat signal on UDP
         #Set settings to broadcast:
         self.client.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
         self.client.setsockopt(socket.SOL_SOCKET,socket.SO_BROADCAST,1)

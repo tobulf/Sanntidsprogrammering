@@ -1,13 +1,13 @@
-from UDP_driver import UDP_CLIENT
+from UDP_driver import UdpClient
 from time import sleep
-adress=("129.241.187.255",20010)
+adress=("",20010)
 serverAdress=("120.23.40.5",230)
 
-server=UDP_CLIENT(adress,serverAdress)
+server=UdpClient(adress,serverAdress)
 
 while True:
     print "imalive!"
-    client.heartbeat()
+    server.Heartbeat()
     sleep(1)
 
 
