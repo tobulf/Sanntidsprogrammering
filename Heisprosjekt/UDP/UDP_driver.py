@@ -7,6 +7,8 @@ class UdpServer(object):
         self.adress=('',PORT) #server own IP and PORT
         self.server=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
         self.server.bind(self.adress)
+        # Set possibility to check buffer even if its nothing there
+        self.server.setblocking(0)
         #variables to see if client is connected and to store serveradress.
         self.connected = False
         self.serverAdress=("",0)
@@ -14,17 +16,27 @@ class UdpServer(object):
 
     def Listen(self):       #function to listen on UDP for the client
         if self.connected:  #if it is connected, it checks the UDP message for "im alive" phrase.
-            data=self.server.recv(1024)
-            message=json.loads(data)
-            if not (message[0] == "im alive"):
-                self.connected = False
+            #try to check buffer
+            try:
+                data = self.server.recv(1024)
+                message=json.loads(data)
+                if not (message[0] == "im alive"):
+                    self.connected = False
+            #if there is nothing in the buffer it throws an exception an passes.
+            except socket.error:
+                pass
+
 
         if not self.connected: #if the client ain't connected it will read IP and PORT for the SERVER serving
-            data=self.server.recv(1024)
-            message=json.loads(data)
-            if (message[0] == "im alive"):
-                self.serverAdress=message[1]
-                self.connected = True
+            try:
+                data=self.server.recv(1024)
+                message=json.loads(data)
+                if (message[0] == "im alive"):
+                    self.serverAdress=message[1]
+                    self.connected = True
+            except socket.error:
+                pass
+
 
 
 
@@ -42,6 +54,10 @@ class UdpClient(object):
         self.client.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
         self.client.setsockopt(socket.SOL_SOCKET,socket.SO_BROADCAST,1)
         #serialize data with json:
-        data=json.dumps(self.imAliveMsg)
+        try:
+            data=json.dumps(self.imAliveMsg)
+        except TypeError:
+            data = "Error"
+            pass
         #send im alive signal:
         self.client.sendto(data, (self.adress))
