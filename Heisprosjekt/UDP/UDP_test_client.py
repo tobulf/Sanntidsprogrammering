@@ -1,13 +1,13 @@
-import UDP_driver
+from UDP_driver import UdpClient
 import time
 port=(20020)
 
 
 
-client=UDP_driver.UDP_CLIENT(port)
+client=UdpClient(port)
 
 while True:
-    client.listen()
+    client.Listen()
     if (client.connected):
         print "connected to: ", client.serverAdress[0],client.serverAdress[1]
     elif not (client.connected):
