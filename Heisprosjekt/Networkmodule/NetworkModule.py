@@ -49,6 +49,9 @@ def Threadfunction2():
     while True:
         heartbeat.Heartbeat()
 
+
+# several request Works fine, handler and server coping good, need only 2 threads!:
+
 def main():
     Thread_1 = Thread(target= Threadfunction1, args = (),)
     Thread_2 = Thread(target= Threadfunction2, args = (),)
