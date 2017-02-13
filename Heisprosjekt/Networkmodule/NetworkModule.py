@@ -4,7 +4,7 @@ from HTTP_driver import HttpServer
 from json import loads,dumps
 from threading import Thread
 from Queue import Queue
-
+from time import sleep
 
 # Declaring a list for current clients:
 ClientList = []
@@ -21,9 +21,9 @@ class RequestHandler(BaseHTTPRequestHandler):
     # custom made handler class for the networkmodule:
     def do_POST(self):
         # Adds the client to the Clientlist:
-        #if not self.client_address in ClientList:
-            # if the served client is not in the client list, it is added
-        #    ClientList.append(self.client_address)
+        if not self.client_address in ClientList:
+            #if the served client is not in the client list, it is added
+            ClientList.append(self.client_address)
         path = self.path
         content_len = int(self.headers.getheader('content-length', 0)) #Finding the length of the response body
         body = self.rfile.read(content_len) #Extracting the body
@@ -38,7 +38,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 handler = RequestHandler
 server = HttpServer(IP, Port, handler)
 server.serving = True
-heartbeat = UdpClient((Bcast,Port) , (IP, Port))
+heartbeat = UdpClient(Bcast, IP, Port )
 
 
 def Threadfunction1():
@@ -47,7 +47,9 @@ def Threadfunction1():
 
 def Threadfunction2():
     while True:
-        heartbeat.Heartbeat()
+        heartbeat.ServerListen()
+
+
 
 
 # several request Works fine, handler and server coping good, need only 2 threads!:
