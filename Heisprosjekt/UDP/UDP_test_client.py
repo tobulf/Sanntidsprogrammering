@@ -13,4 +13,4 @@ while True:
         print "connected to: ", server.ServerAddress[0],server.ServerAddress[1]
     elif not (server.connected):
         print "Currently Disconnected"
-    sleep(1)
+

@@ -2,9 +2,9 @@ from BaseHTTPServer import BaseHTTPRequestHandler
 from HTTP_driver import HttpServer
 from json import dumps,loads
 message=["yep it works"]
-data =dumps(message)
+data = dumps(message)
 
-address = "129.241.187.143"
+address = ""
 port = 20010
 
 class RequestHandler(BaseHTTPRequestHandler):
