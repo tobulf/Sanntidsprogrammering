@@ -6,7 +6,6 @@ client = HttpClient(address, port)
 client.connected = True
 message = ["this shit works!!!"]
 path = "Works"
-
-response = client.PostRequest(path, message)
-
-print response[0]
+while True:
+    response = client.PostRequest(path, message)
+    print response[0]
