@@ -31,11 +31,24 @@ class HttpClient(object):
                 # Check if the status is OK:
                 if (response.status == 200):
                     received = loads(response.reason)
+                    self.connected = True
             except (socket.error, TypeError):
                 self.connected = False
                 pass
             return received
-
+    def GetRequest(self, path):
+        try:
+                self.client.connect()
+                # Send the request as a path
+                self.client.request("POST", path)
+                # wait for response:
+                response = self.client.getresponse()
+                # Check if the status is OK:
+                if (response.status == 200):
+                    self.connected = True
+            except (socket.error, TypeError):
+                self.connected = False
+                pass
 
 
 class HttpServer(object):

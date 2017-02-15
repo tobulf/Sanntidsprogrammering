@@ -1,5 +1,7 @@
 import socket
 from json import dumps, loads
+from Timer import Timer
+
 
 class UdpServer(object):
     def __init__(self,Port): # constructor, makes an socket named server.
@@ -45,6 +47,7 @@ class UdpServer(object):
 
 class UdpClient(object):
     def __init__(self, Bcast, IP, Port):
+        self.timer = Timer()
         self.Address       = (Bcast, Port)
         self.Port          = Port
         self.ServingAdress = (IP, Port)
@@ -78,10 +81,19 @@ class UdpClient(object):
             # if there is nothing in the buffer it throws an exception an passes.
             message = loads(data)
             if not message[0] == "im alive":
-                self.ServingServer = True
-            elif message[0] == "im alive":
+                if not self.timer.start:
+                    self.timer.StartTimer()
+                elif self.timer.GetCurrentTime() > 3:
+                    self.ServingServer = True
+                    self.timer.StopTimer()
+            elif message[0] == "im alive" and not self.ServingServer:
                 self.ServingServer = False
         except (socket.error, TypeError, ValueError):
-            self.ServingServer = True
-            print "serving"
+            if not self.timer.started:
+                    #starts the internal timer
+                    self.timer.StartTimer()
+            elif self.timer.GetCurrentTime() > 3:
+                    #if It has gone more than Three seconds it considers itself as the serving server
+                self.ServingServer = True
+                self.timer.StopTimer()
             pass
