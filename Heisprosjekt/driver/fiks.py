@@ -1,7 +1,18 @@
-from elev import Elev
+from Elev import ELEV
 from ctypes import cdll
 
 
 native = cdll.LoadLibrary("./elev.so")
 
-elev = Elev(native)
+
+
+
+
+
+
+
+
+
+
+
+

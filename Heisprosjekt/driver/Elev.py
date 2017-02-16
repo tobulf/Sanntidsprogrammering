@@ -2,21 +2,11 @@ from ctypes import cdll
 
 
 
-class Motor_direction:
-    DIRN_DOWN = -1
-    DIRN_STOP =  0
-    DIRN_UP   =  1
-
-class Lamp_type:
-    BUTTON_CALL_UP   = 0
-    BUTTON_CALL_DOWN = 1
-    BUTTON_COMMAND   = 2
-
 
 
 class Elev(object):
-    def __init__(self, Native):
-        self.native = Native
+    def __init__(self):
+        self.native = cdll.LoadLibrary("./elev.so")
         self.native.elev_init()
 
     def set_motordirection(self, dirn):
@@ -45,5 +35,6 @@ class Elev(object):
 
     def get_obstruction_signal(self):
         return self.native.elev_get_obstruction_signal()
+
 
 
