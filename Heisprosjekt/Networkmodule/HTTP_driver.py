@@ -2,10 +2,36 @@ from BaseHTTPServer import HTTPServer
 import socket
 from httplib import HTTPConnection
 from json import dumps, loads
+from client import client
+class client(object):
+    ip = ""
+    order = [order()]
+    def __init__(self):
+        self.ip= ""
+        self.order = [1232]
 
+    def __init__(self, dt):
+        self.fromJson(dt)
+    def toJson(self):
+        self.data = json.dumps(self.__dict__)
 
+    def fromJson(self,dt):
+        struct = json.loads(dt)
+        self.x = struct["x"]
+        self.y = struct["y"]
 
+clieent2 = client()
+client2.toJson()
 
+client2(data)
+request.post(url, json = client.data)
+class Foo2(shit):
+    def __init__(self, dt):
+        struct = json.loads(dt)
+        self.x = struct["x"]
+        self.y = struct["y"]
+
+json.dumps(test.__dict__)
 class HttpClient(object):
     def __init__(self, address, port):
         self.address   = address
@@ -13,8 +39,7 @@ class HttpClient(object):
         self.client    = HTTPConnection(address, port)
         # internal variable to check connection:
         self.connected = False
-
-
+    request.post(ip:port,data)
     def PostRequest(self, path, message):
         if self.connected:
             received = [0]
@@ -36,6 +61,7 @@ class HttpClient(object):
                 self.connected = False
                 pass
             return received
+
     def GetRequest(self, path):
         try:
                 self.client.connect()
