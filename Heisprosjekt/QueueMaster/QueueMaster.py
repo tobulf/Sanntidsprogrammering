@@ -1,40 +1,29 @@
-
-
+from Client import Client
+from json import dumps, loads
 
 
 #position = [floor, direction]
+
 # Order = [floor, true/false]
 
-
-
 class QueueMaster(object):
-    def __init__(self, Floors):
-        self.clientlist      = []
-        #list of Boolean values for orders:
-        self.externalorders  = [Floors]
-        # list of positions of all elevators
-        self.elevatorpos     = []
-        # List of all external lights also Boolean
-        self.external_lights = [Floors]
-
-
+    def __init__(self):
+        self.clientlist = []
 
 # Client-Server interfaces:
-    def AddClient(self, ClientAdress, Position):
-        self.clientlist.append(ClientAdress)
-        self.elevatorpos.append(Position)
+    def AddClient(self, Client):
+        if not Client in self.clientlist:
+            self.clientlist.append(Client)
 
-    def GetQueue(self, ClientAdress, Position):
+    def GetQueue(self, Client):
+        pass
+
+    def GotExternalorder(self, Client):
+        pass
 
 
-    def GotExternalorder(self, Order):
-        #Updates the order in the directory:
-        try:
-            self.externalorders[Order[0]] = Order[1]
-        except IndexError:
-            pass
-
-    def UpdatePosition(self, ClientAdress, Postition):
+    def UpdatePosition(self, Client):
+        pass
 
 
 
@@ -44,14 +33,24 @@ class QueueMaster(object):
 
 # Server to server interfaces:
 
-    def GetAllOrders(self):
-        return [self.clientlist, self.externalorders, self. elevatorpos, self.external_lights]
+    def toJson(self):
+        #serialise clientlist:
+        for i in range(len(self.clientlist)):
+            temp = self.clientlist[i]
+            self.clientlist[i] = temp.toJson()
+        return dumps(self.__dict__)
 
-    def BackUp(self, AllOrders):
-        self.clientlist      = AllOrders[0]
-        self.externalorders  = AllOrders[1]
-        self. elevatorpos    = AllOrders[2]
-        self.external_lights = AllOrders[3]
+
+
+    def fromJson(self, data):
+        #deserializs clientlist
+        dict = loads(data)
+        self.clientlist = dict["clientlist"]
+        for i in range(len(self.clientlist)):
+            temp = self.clientlist[i]
+            self.clientlist[i] = Client()
+            self.clientlist[i].fromJson(temp)
+
 
 
 
