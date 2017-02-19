@@ -1,5 +1,10 @@
-from Elev import Elev
+from Driver import Elevator
+from time import sleep
 
 
-elev = Elev()
+elev = Elevator()
+elev.Queue[2] = True
+elev.OpenDoor()
+
+print elev.IsOrdersAbove(-10)
 
