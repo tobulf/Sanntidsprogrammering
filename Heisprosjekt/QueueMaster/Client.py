@@ -6,28 +6,37 @@ class Client(object):
     # Constructor:
     # Object can contain all information needed for any client, default everything is set to None.
 
-    def __init__(self, Externallights = None, Position = None , Externalorder = None, Order = None, Orderlist = None, Address = None, Dict = None):
+    def __init__(self,Direction = None, Externallights = None, Position = None , Externalorders = None, Order = None, Orderlist = None, Address = None):
+
         self.address = Address
+        # Current direction of the elevator:
+        self.direction = Direction
+        # Order is a new external order to be executed
         self.order = Order
-        self.externalorder = Externalorder
+        # All external orders client currently is serving:
+        self.externalorders = Externalorders
+        # List of all current orders / all floors where elevator will stop:
         self.orderlist = Orderlist
-        self.dict = Dict
+        # Current position of the elvator:
         self.position = Position
+        # List of external light orders:
         self.externallights = Externallights
 
 
     def toJson(self):
         return dumps(self.__dict__)
 
-    def fromJson(self, Dict):
-        self.struct = loads(Dict)
-        self.address = self.struct["address"]
-        self.order = self.struct["order"]
-        self.externalorder = self.struct["externalorder"]
-        self.orderlist = self.struct["orderlist"]
-        self.dict = self.struct["dict"]
-        self.position = self.struct["position"]
-        self.externallights = self.struct["externallights"]
+    def fromJson(self, Data):
+        # Take in serialized object and construct a dict:
+        self.dict = loads(Data)
+        # Decompose the dict into the new object:
+        self.address = self.dict["address"]
+        self.order = self.dict["order"]
+        self.direction = self.dict["direction"]
+        self.externalorders = self.dict["externalorders"]
+        self.orderlist = self.dict["orderlist"]
+        self.position = self.dict["position"]
+        self.externallights = self.dict["externallights"]
 
 
 

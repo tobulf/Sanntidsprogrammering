@@ -1,5 +1,6 @@
 from Client import Client
 from json import dumps, loads
+from operator import add
 
 
 #position = [floor, direction]
@@ -12,18 +13,35 @@ class QueueMaster(object):
 
 # Client-Server interfaces:
     def AddClient(self, Client):
-        if not Client in self.clientlist:
-            self.clientlist.append(Client)
+        # If the client aint in the clientlist, it will be added:
+        for i in range(len(self.clientlist)):
+            if Client.address == self.clientlist[i].address:
+                return False
+        self.clientlist.append(Client)
+        return True
 
-    def GetQueue(self, Client):
-        pass
+    def GetUpdate(self, Client):
+        # Tries to add the client in case its a new client, also returns just the Client, since it is new:
+        if self.AddClient(Client):
+            return Client
+        # If the Client is in the list, it returns the latest Client object
+        else:
+            for i in range(len(self.clientlist)):
+                if Client.address == self.clientlist[i].address:
+                    return self.clientlist[i]
 
-    def GotExternalorder(self, Client):
-        pass
+
+    def GotOrder(self, Client):
+        # Tries to add the client in case its a new client
+        self.AddClient(Client)
+
+
 
 
     def UpdatePosition(self, Client):
-        pass
+        # Tries to add the client in case its a new client
+        self.AddClient(Client)
+
 
 
 
