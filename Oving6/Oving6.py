@@ -1,16 +1,15 @@
 from UDP_driver import UdpClient,UdpServer
-from subprocess import call
-import os
+import subprocess as sub
+from time import sleep
 from Timer import Timer
 
 
 Bcast ="129.241.187.255"
 
-port = 20012
+port = 20013
 
 timer = Timer()
 server = UdpClient((Bcast, port), "cunt")
-server.imAliveMsg[1] = 0
 client = UdpServer(port)
 
 
@@ -18,18 +17,23 @@ client = UdpServer(port)
 
 
 def main():
+    sleep(3)
     count = 0
-    client.ServerAddress = count
     client.Listen()
+    while client.connected:
+        client.Listen()
+        count = client.ServerAddress
+        print count
+        sleep(1)
     if not client.connected:
         client.server.close()
         count = client.ServerAddress
-        os.system("gnome-terminal -x -sh -c -python Oving6.py")
+        #os.system("gnome-terminal", "-x", "-sh", "-c", "-python Oving6.py")
+        sub.Popen(["gnome-terminal", "-x", "sh", "-c", "python Oving6.py"]);
     while not client.connected:
-        server.imAliveMsg[1] = count
+        print count
+        server.Heartbeat(count)
         count+=1
-        server.Heartbeat()
-        timer.WaitNSeconds(1)
-
+        sleep(1)
 main()
 

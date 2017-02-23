@@ -24,6 +24,8 @@ class UdpServer(object):
                 message = loads(data)
                 if not message[0] == "im alive":
                     self.connected = False
+                elif message[0] == "im alive":
+                    self.ServerAddress = message[1]
             # Catches both socket error and JSON error:
             except (socket.error, TypeError, ValueError):
                 self.connected = False
@@ -36,6 +38,7 @@ class UdpServer(object):
                 message = loads(data)
                 if message[0] == "im alive":
                     self.ServerAddress = message[1]
+
                     self.connected = True
             except (socket.error, TypeError, ValueError):
                 pass
@@ -47,15 +50,16 @@ class UdpClient(object):
     def __init__(self, Adress, ServingAdress):
         self.Adress        = Adress
         self.ServingAdress = ServingAdress
-        self.imAliveMsg    = ["im alive", ServingAdress]
+        self.imAliveMsg    = ["im alive",0]
         self.ServingServer = False
         self.client        = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
         # standard variables, im alive message and if the client is serving.
 
 
-    def Heartbeat(self):
+    def Heartbeat(self, Count):
         # function to send out heartbeat signal on UDP
         # Set settings to broadcast:
+        self.imAliveMsg[1] = Count
         self.client.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
         self.client.setsockopt(socket.SOL_SOCKET,socket.SO_BROADCAST,1)
         # serialize data with json:
