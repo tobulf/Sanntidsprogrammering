@@ -1,3 +1,6 @@
+# Classes containing Elevator button types, sort of like typedef:
+
+
 class Motor_direction:
     DIRN_DOWN = -1
     DIRN_STOP =  0
