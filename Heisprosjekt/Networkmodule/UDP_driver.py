@@ -1,5 +1,7 @@
 import socket
 from json import dumps, loads
+from Timer import Timer
+
 
 class UdpServer(object):
     def __init__(self,Port): # constructor, makes an socket named server.
@@ -44,10 +46,12 @@ class UdpServer(object):
 
 
 class UdpClient(object):
-    def __init__(self, Adress, ServingAdress):
-        self.Adress        = Adress
-        self.ServingAdress = ServingAdress
-        self.imAliveMsg    = ["im alive", ServingAdress]
+    def __init__(self, Bcast, IP, Port):
+        self.timer = Timer()
+        self.Address       = (Bcast, Port)
+        self.Port          = Port
+        self.ServingAdress = (IP, Port)
+        self.imAliveMsg    = ["im alive", self.ServingAdress]
         self.ServingServer = False
         self.client        = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
         # standard variables, im alive message and if the client is serving.
@@ -65,4 +69,31 @@ class UdpClient(object):
             data = "Error"
             pass
         # send im alive signal:
-        self.client.sendto(data, (self.Adress))
+        self.client.sendto(data, (self.Address))
+
+    def ServerListen(self):
+        self.client  = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+        self.client.bind(('',self.Port))
+        # Set possibility to check buffer even if its nothing there
+        self.client.setblocking(0)
+        try:
+            data = self.client.recv(1024)
+            # if there is nothing in the buffer it throws an exception an passes.
+            message = loads(data)
+            if not message[0] == "im alive":
+                if not self.timer.start:
+                    self.timer.StartTimer()
+                elif self.timer.GetCurrentTime() > 3:
+                    self.ServingServer = True
+                    self.timer.StopTimer()
+            elif message[0] == "im alive" and not self.ServingServer:
+                self.ServingServer = False
+        except (socket.error, TypeError, ValueError):
+            if not self.timer.started:
+                    #starts the internal timer
+                    self.timer.StartTimer()
+            elif self.timer.GetCurrentTime() > 3:
+                    #if It has gone more than Three seconds it considers itself as the serving server
+                self.ServingServer = True
+                self.timer.StopTimer()
+            pass
