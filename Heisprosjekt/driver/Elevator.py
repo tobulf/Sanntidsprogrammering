@@ -21,11 +21,11 @@ class Elevator(object):
             self.Queue.append(False)
         # Initialise the elevator, Makes it go to 1st floor:
         self.elev.set_motordirection(Motor_direction.DIRN_DOWN)
-        while self.elev.get_floor_sensor_signal() != 0:
+        while self.elev.get_floor_sensor_signal() == -1:
             pass
         self.elev.set_motordirection(Motor_direction.DIRN_STOP)
         # Current floor
-        self.currentfloor = 0
+        self.currentfloor = self.elev.get_floor_sensor_signal()
 
 
     def Serve(self):
@@ -72,8 +72,15 @@ class Elevator(object):
                         self.prevstate =  Elevator_state.IDLE
                 # If the elevator is IDLE or has served the floors in current direction it takes the first and best order.
                 elif self.prevstate == Elevator_state.IDLE:
+                    if self.IsOrderAtFloor(self.currentfloor):
+                        # Kill all lights on the floor:
+                        KillLights(self.currentfloor)
+                        # delete order from Queue
+                        self.Queue[self.currentfloor] = False
+                        # Open the door
+                        self.OpenDoor()
                     # Checks if there are orders below the elevator and starts serving these if any.
-                    if self.IsOrdersAbove(self.currentfloor):
+                    elif self.IsOrdersAbove(self.currentfloor):
                         self.elev.set_motordirection(Motor_direction.DIRN_UP)
                         self.direction = Motor_direction.DIRN_UP
                         self.currentstate = Elevator_state.RUNNING
