@@ -37,4 +37,4 @@ class Elev(object):
         return self.native.elev_get_obstruction_signal()
 
 
-
+elev = Elev()
