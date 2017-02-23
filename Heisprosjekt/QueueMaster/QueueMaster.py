@@ -1,5 +1,6 @@
 from Client import Client
 from json import dumps, loads
+from Timer import Timer
 from operator import add
 
 
@@ -10,14 +11,17 @@ from operator import add
 class QueueMaster(object):
     def __init__(self):
         self.clientlist = []
-
+        self.timerlist = []
 # Client-Server interfaces:
     def AddClient(self, Client):
         # If the client aint in the clientlist, it will be added:
         for i in range(len(self.clientlist)):
             if Client.address == self.clientlist[i].address:
                 return False
+        # Adds the new client to the client list:
         self.clientlist.append(Client)
+        # Each client has a own timer:
+        self.timerlist.append(Timer())
         return True
 
     def GetUpdate(self, Client):
@@ -34,6 +38,7 @@ class QueueMaster(object):
     def GotOrder(self, Client):
         # Tries to add the client in case its a new client
         self.AddClient(Client)
+
 
 
 
