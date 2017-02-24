@@ -3,6 +3,8 @@ from time import sleep
 from Timer import Timer
 from LightCtrl import KillLights
 from TypeClasses import *
+from threading import Lock
+mutex = Lock()
 
 class Elevator(object):
     # when you initialise the class, you also initialise the elevator, goes to first floor.
@@ -32,7 +34,10 @@ class Elevator(object):
         while True:
             # This is basicaly a state Machine for the elevator:
             if self.currentstate == Elevator_state.RUNNING:
+                # Using mutex to avoid Concurrency
+                mutex.acquire()
                 self.currentfloor = self.elev.get_floor_sensor_signal()
+                mutex.release()
                 try:
                     assert(self.currentfloor != -1)
                     self.elev.set_floor_indicator(self.currentfloor)
@@ -75,21 +80,27 @@ class Elevator(object):
                     if self.IsOrderAtFloor(self.currentfloor):
                         # Kill all lights on the floor:
                         KillLights(self.currentfloor)
+                        # Using mutex to avoid Concurrency
+                        mutex.acquire()
                         # delete order from Queue
                         self.Queue[self.currentfloor] = False
+                        mutex.release()
                         # Open the door
                         self.OpenDoor()
                     # Checks if there are orders below the elevator and starts serving these if any.
                     elif self.IsOrdersAbove(self.currentfloor):
                         self.elev.set_motordirection(Motor_direction.DIRN_UP)
+                        mutex.acquire()
                         self.direction = Motor_direction.DIRN_UP
+                        mutex.release()
                         self.currentstate = Elevator_state.RUNNING
                     # Checks if there are orders above the elevator and starts serving these if any.
                     elif self.IsOrdersBelow(self.currentfloor):
                         self.elev.set_motordirection(Motor_direction.DIRN_DOWN)
+                        mutex.acquire()
                         self.direction = Motor_direction.DIRN_DOWN
+                        mutex.release()
                         self.currentstate = Elevator_state.RUNNING
-
             # Implement when the time comes... maybe never
             elif self.currentstate == Elevator_state.OBSTRUCTION:
                 pass
