@@ -90,6 +90,7 @@ class Elevator(object):
                     # Checks if there are orders below the elevator and starts serving these if any.
                     elif self.IsOrdersAbove(self.currentfloor):
                         self.elev.set_motordirection(Motor_direction.DIRN_UP)
+                        # Using mutex to avoid Concurrency
                         mutex.acquire()
                         self.direction = Motor_direction.DIRN_UP
                         mutex.release()
@@ -97,6 +98,7 @@ class Elevator(object):
                     # Checks if there are orders above the elevator and starts serving these if any.
                     elif self.IsOrdersBelow(self.currentfloor):
                         self.elev.set_motordirection(Motor_direction.DIRN_DOWN)
+                        # Using mutex to avoid Concurrency
                         mutex.acquire()
                         self.direction = Motor_direction.DIRN_DOWN
                         mutex.release()
