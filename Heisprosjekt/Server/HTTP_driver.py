@@ -3,7 +3,7 @@ import socket
 from httplib import HTTPConnection
 from json import dumps, loads
 
-from Client import Client
+from client import client
 
 
 
@@ -14,7 +14,7 @@ class HttpClient(object):
         self.client    = HTTPConnection(address, port)
         # internal variable to check connection:
         self.connected = False
-
+    request.post(ip:port,data)
     def PostRequest(self, path, message):
         if self.connected:
             received = [0]
