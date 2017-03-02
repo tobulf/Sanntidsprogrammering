@@ -148,15 +148,6 @@ class QueueMaster(object):
         self.timerlist[priorityIndex].StartTimer()
 
 
-    def CheckTimeout(self):
-        # Internal function, Check all timers.
-        for i in range(len(self.timerlist)):
-            if self.timerlist[i].GetCurrentTime() > self.timeout:
-                # Considers Client disconnected:
-                self.clientlist[i].connected = False
-                # Returns index of the Client that has timed out.
-                return i
-        return False
 
 
 # Server to server interfaces:
