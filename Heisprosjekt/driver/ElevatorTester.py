@@ -5,6 +5,7 @@ from TypeClasses import *
 from ButtonsPressed import ButtonsPressed
 from LightCtrl import *
 from time import sleep
+from json import dumps
 from Elev import elev
 elevator = Elevator()
 mutex = Lock()
@@ -16,10 +17,12 @@ def ElevatorThread():
 def ButtonThread():
     while True:
         pressed = ButtonsPressed()
+        #print dumps(elevator.Queue)
         if pressed:
             floor, button = pressed
             mutex.acquire()
-            elevator.Queue[floor] = True
+            elevator.Queue[button][floor] = True
+
             mutex.release()
             SetLigth(floor, button)
         else:

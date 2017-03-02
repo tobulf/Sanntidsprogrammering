@@ -10,6 +10,9 @@ class Elevator(object):
     # when you initialise the class, you also initialise the elevator, goes to first floor.
     def __init__(self, Floors = 4):
         self.elev = elev
+        # Number of floors:
+        self.floors = Floors
+
         # Elevator current state, and previous state
         self.currentstate = Elevator_state.IDLE
         self.prevstate = Elevator_state.IDLE
@@ -18,9 +21,10 @@ class Elevator(object):
         # Initially the elevator is just IDLE in 1st floor:
         self.direction = Motor_direction.DIRN_STOP
         # Initialize a internal queue with no orders:
-        self.Queue = []
-        for i in range(Floors):
-            self.Queue.append(False)
+        self.InternalQueue = [False] * Floors
+        self.ExternalQueueDown = [False]*Floors # queue from external orders, determined by server
+        self.ExternalQueueUp = [False] * Floors # queue from external orders, determined by server
+        self.Queue = [self.ExternalQueueUp, self.ExternalQueueDown, self.InternalQueue ]
         # Initialise the elevator, Makes it go to 1st floor:
         self.elev.set_motordirection(Motor_direction.DIRN_DOWN)
         while self.elev.get_floor_sensor_signal() == -1:
@@ -41,7 +45,16 @@ class Elevator(object):
                 try:
                     assert(self.currentfloor != -1)
                     self.elev.set_floor_indicator(self.currentfloor)
-                    if self.IsOrderAtFloor(self.currentfloor):
+                    #fix
+
+                    if self.direction == Motor_direction.DIRN_DOWN and (self.IsOrderInQueue(self.ExternalQueueUp) or self.IsOrderInQueue(self.InternalQueue)):
+                        # If it is a order at that floor, stop the elevator:
+                        self.elev.set_motordirection(Motor_direction.DIRN_STOP)
+                        # Update states
+                        self.prevstate = self.currentstate
+                        self.currentstate = Elevator_state.IDLE
+
+                    elif self.direction == Motor_direction.DIRN_UP and (self.IsOrderInQueue(self.ExternalQueueDown) or self.IsOrderInQueue(self.InternalQueue)):
                         # If it is a order at that floor, stop the elevator:
                         self.elev.set_motordirection(Motor_direction.DIRN_STOP)
                         # Update states
@@ -57,8 +70,12 @@ class Elevator(object):
                     self.OpenDoor()
                     # Turns of all the lights at the floor it arrived at:
                     KillLights(self.currentfloor)
-                    # Deletes the order from the Queue:
-                    self.Queue[self.currentfloor] = False
+                    # Deletes the order from the Queue, assumes everyone enters/exits the elevator when the door open:
+                    self.InternalQueue[self.currentfloor] = False
+                    self.ExternalQueueDown[self.currentfloor] = False
+                    self.ExternalQueueUp[self.currentfloor] = False
+
+
                     # If there are orders above and the elevator was running it continues in that direction.
                     if self.IsOrdersAbove(self.currentfloor) and self.direction == Motor_direction.DIRN_UP:
                         self.elev.set_motordirection(Motor_direction.DIRN_UP)
@@ -77,13 +94,16 @@ class Elevator(object):
                         self.prevstate =  Elevator_state.IDLE
                 # If the elevator is IDLE or has served the floors in current direction it takes the first and best order.
                 elif self.prevstate == Elevator_state.IDLE:
-                    if self.IsOrderAtFloor(self.currentfloor):
+                    # if the button is pressed when the lift is already on the floor:
+                    if self.IsOrderInQueue(self.ExternalQueueUp) or self.IsOrderInQueue(self.ExternalQueueDown) or self.IsOrderInQueue(self.InternalQueue):
                         # Kill all lights on the floor:
                         KillLights(self.currentfloor)
                         # Using mutex to avoid Concurrency
                         mutex.acquire()
-                        # delete order from Queue
-                        self.Queue[self.currentfloor] = False
+                        # delete orders from Queues
+                        self.ExternalQueueDown[self.currentfloor] = False
+                        self.ExternalQueueUp[self.currentfloor] = False
+                        self.InternalQueue[self.currentfloor] = False
                         mutex.release()
                         # Open the door
                         self.OpenDoor()
@@ -130,8 +150,8 @@ class Elevator(object):
         except AssertionError:
             pass
 
-    def IsOrderAtFloor(self, Floor):
-        if self.Queue[Floor]:
+    def IsOrderInQueue(self, Queue):
+        if Queue[self.currentfloor]:
             return True
         else:
             return False
@@ -139,10 +159,11 @@ class Elevator(object):
 
     def IsOrdersAbove(self, Floor):
         # Iterate over the floors above and check for orders:
-        for i in range(Floor+1, len(self.Queue)):
+        for i in range(self.currentfloor+1, self.floors):
             # Error handling in-case operator put in floors below 0
             try:
-                if self.Queue[i]:
+                # if there are any orders above pending in any queue
+                if self.InternalQueue[i] or self.ExternalQueueDown[i] or self.ExternalQueueUp[i]:
                     return True
             except IndexError:
                 pass
@@ -150,10 +171,11 @@ class Elevator(object):
 
     def IsOrdersBelow(self, Floor):
         # Iterate over the Queue and check if there are orders below floor argument:
-        for i in range(Floor-1, -1, -1):
+        for i in range(self.currentfloor-1, -1, -1):
             # Adding som error handling in-case operator put in too big floor
             try:
-                if self.Queue[i]:
+                # if there are any orders below pending in any queue
+                if self.InternalQueue[i] or self.ExternalQueueDown[i] or self.ExternalQueueUp[i]:
                     return True
             except IndexError:
                 pass
