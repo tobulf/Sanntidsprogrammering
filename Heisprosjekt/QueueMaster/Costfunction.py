@@ -3,15 +3,16 @@ from TypeClasses import *
 
 # Insane COSTFUNCTION!
 
-def PrioritizeOrder(Clientlist, externalorder):
+def FastestElevator(Clientlist, externalorder):
     Clientindex = -1
     Length = -1
     for i in range(len(Clientlist)):
-        temp = GetLength(Clientlist[i].orderlist, Clientlist[i].direction, externalorder, Clientlist[i].position)
-        if Length == -1:
+        temp = GetLength(Clientlist[i].internalOrders, Clientlist[i].direction, externalorder, Clientlist[i].position)
+        # Only considers Clients that is connected:
+        if Length == -1 and Clientlist[i].connected:
             Length = temp
             Clientindex = i
-        elif Length > temp:
+        elif Length > temp and Clientlist[i].connected:
             Length = temp
             Clientindex = i
     return Clientindex
