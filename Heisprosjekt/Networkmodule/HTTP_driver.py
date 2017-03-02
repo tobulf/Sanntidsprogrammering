@@ -3,8 +3,6 @@ import socket
 from httplib import HTTPConnection
 from json import dumps, loads
 
-from Client import Client
-
 
 
 class HttpClient(object):
@@ -39,17 +37,17 @@ class HttpClient(object):
 
     def GetRequest(self, path):
         try:
-                self.client.connect()
-                # Send the request as a path
-                self.client.request("POST", path)
-                # wait for response:
-                response = self.client.getresponse()
-                # Check if the status is OK:
-                if (response.status == 200):
-                    self.connected = True
-            except (socket.error, TypeError):
-                self.connected = False
-                pass
+            self.client.connect()
+            # Send the request as a path
+            self.client.request("POST", path)
+            # wait for response:
+            response = self.client.getresponse()
+            # Check if the status is OK:
+            if (response.status == 200):
+                self.connected = True
+        except (socket.error, TypeError):
+            self.connected = False
+            pass
 
 
 class HttpServer(object):
