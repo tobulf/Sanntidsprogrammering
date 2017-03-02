@@ -1,4 +1,3 @@
-from Client import Client
 from TypeClasses import *
 
 # Insane COSTFUNCTION!

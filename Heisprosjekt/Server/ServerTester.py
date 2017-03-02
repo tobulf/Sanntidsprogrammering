@@ -1,8 +1,5 @@
 from HTTPClient import HttpClient
-from Client import Client
-from time import sleep
-
-
+from Heisprosjekt.Server.Client import Client
 
 IP    = "129.241.187.150"
 Port  = 20010

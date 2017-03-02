@@ -20,6 +20,10 @@ class Elevator_state:
     OBSTRUCTION = 2
     IDLE        = 3
 
+class ServerState:
+    Listening = 1
+    Serving   = 2
+
 class Button_type:
     BUTTON_CALL_UP   = 0
     BUTTON_CALL_DOWN = 1

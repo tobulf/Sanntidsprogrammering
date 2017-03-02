@@ -1,16 +1,18 @@
 from BaseHTTPServer import BaseHTTPRequestHandler
-from UDP_driver  import UdpClient
-from HTTPServer import HttpServer
-from threading import Thread
-from QueueMaster import QueueMaster
-from Client import Client
 from json import dumps
-
+from threading import Thread,Lock
+from HTTPServer import HttpServer
+from HTTPClient import HttpClient
+from Client import Client
+from QueueMaster import QueueMaster
+from UDPClient  import UdpClient
+from TypeClasses import*
 
 # Testing shit
 Bcast = "129.241.187.255"
 IP    = "129.241.187.150"
 Port  = 20010
+
 
 # Declare the queuemasterobject for this server
 queuemaster = QueueMaster()
@@ -22,6 +24,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         content_len = int(self.headers.getheader('content-length', 0)) #Finding the length of the response body
         body = self.rfile.read(content_len) #Extracting the body
         try:
+            # Declare the Client object to receive:
             Clientobject = Client()
             # Answer is calculated and serialized directly
             if self.path == "Got Order":
@@ -46,20 +49,43 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.send_response(200, answer)
 
 Handler = RequestHandler
-server = HttpServer(IP, Port, Handler)
+server  = HttpServer(IP, Port, Handler)
 server.serving = True
-heartbeat = UdpClient(Bcast, IP, Port )
-
+heartbeat = UdpClient(Bcast, IP, Port)
+state = ServerState.Listening
+# Declares a Client, binds it to port zero and local.
+backupclient  = HttpClient("",0)
+# Mutex
+Mutex = Lock()
 
 def Threadfunction1():
     while True:
-        # Serve request:
-        server.ServeOnce()
-        queuemaster.CheckTimeout()
+        if heartbeat.ServingServer:
+            # Serve request:
+            server.ServeOnce()
+            # Check for Timeouts
+            queuemaster.CheckTimeout()
+        else:
+            queuemaster = backupclient.GetRequest()
+
+
 
 def Threadfunction2():
     while True:
-        heartbeat.Heartbeat()
+        if heartbeat.ServingServer:
+            heartbeat.Heartbeat()
+        else:
+            Mutex.acquire()
+            heartbeat.ServerListen()
+            Mutex.release()
+            if heartbeat.ServingServer:
+                pass
+            else:
+                # Bind the Client to the Ip and port of current serving server:
+                Mutex.acquire()
+                backupclient = HttpClient(heartbeat.ServerAdress[0], heartbeat.ServerAdress[1])
+                Mutex.release()
+
 
 
 

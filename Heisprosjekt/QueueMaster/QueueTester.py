@@ -1,11 +1,7 @@
-from QueueMaster import QueueMaster
 import time
-from TypeClasses import *
-from Client import Client
-from Costfunction import *
-from random import randint
-import json
 
+from Costfunction import *
+from Heisprosjekt.Server.QueueMaster import QueueMaster
 
 Target = 1
 queue1 = [True, True, True, True]

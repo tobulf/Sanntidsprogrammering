@@ -2,9 +2,10 @@ from json import dumps, loads
 
 
 class Client(object):
+
     # Constructor:
     # Object can contain all information needed for any client, default everything is set to None.
-    def __init__(self, Address = None, Direction = None, Order = None, OrderCompleted = None, OrderDown = None, OrderUp = None, InternalOrders = [None]*4, Position = None, LightsUp = [None]*4, LightsDown = [None]*4):
+    def __init__(self, Address = None, Direction = None, Order = None, OrderCompleted = None, OrderDown = [False]*4, OrderUp = [False]*4, InternalOrders = [None]*4, Position = None, LightsUp = [None]*4, LightsDown = [None]*4):
         self.address = Address
         # Current direction of the elevator:
         self.direction = Direction
@@ -26,6 +27,9 @@ class Client(object):
         self.lightsDown = LightsDown
         # Internal variable for the server to check if it is connected:
         self.connected = True
+
+
+
 
     def toJson(self):
         return dumps(self.__dict__)
