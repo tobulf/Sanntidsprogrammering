@@ -22,7 +22,6 @@ def ButtonThread():
             floor, button = pressed
             mutex.acquire()
             elevator.Queue[button][floor] = True
-
             mutex.release()
             SetLigth(floor, button)
         else:

@@ -47,14 +47,14 @@ class Elevator(object):
                     self.elev.set_floor_indicator(self.currentfloor)
                     #fix
 
-                    if self.direction == Motor_direction.DIRN_DOWN and (self.IsOrderInQueue(self.ExternalQueueUp) or self.IsOrderInQueue(self.InternalQueue)):
+                    if self.StopAtFloor():
                         # If it is a order at that floor, stop the elevator:
                         self.elev.set_motordirection(Motor_direction.DIRN_STOP)
                         # Update states
                         self.prevstate = self.currentstate
                         self.currentstate = Elevator_state.IDLE
 
-                    elif self.direction == Motor_direction.DIRN_UP and (self.IsOrderInQueue(self.ExternalQueueDown) or self.IsOrderInQueue(self.InternalQueue)):
+                    elif self.StopAtFloor():
                         # If it is a order at that floor, stop the elevator:
                         self.elev.set_motordirection(Motor_direction.DIRN_STOP)
                         # Update states
@@ -95,7 +95,7 @@ class Elevator(object):
                 # If the elevator is IDLE or has served the floors in current direction it takes the first and best order.
                 elif self.prevstate == Elevator_state.IDLE:
                     # if the button is pressed when the lift is already on the floor:
-                    if self.IsOrderInQueue(self.ExternalQueueUp) or self.IsOrderInQueue(self.ExternalQueueDown) or self.IsOrderInQueue(self.InternalQueue):
+                    if self.StopAtFloor():
                         # Kill all lights on the floor:
                         KillLights(self.currentfloor)
                         # Using mutex to avoid Concurrency
@@ -150,8 +150,12 @@ class Elevator(object):
         except AssertionError:
             pass
 
-    def IsOrderInQueue(self, Queue):
-        if Queue[self.currentfloor]:
+
+
+    def StopAtFloor(self):
+        if self.InternalQueue[self.currentfloor] or (self.ExternalQueueDown[self.currentfloor] and self.direction == Motor_direction.DIRN_DOWN) or (self.ExternalQueueUp[self.currentfloor] and not self.IsOrdersBelow(self.currentfloor)):
+            return True
+        elif self.InternalQueue[self.currentfloor] or (self.ExternalQueueUp[self.currentfloor] and self.direction == Motor_direction.DIRN_UP) or (self.ExternalQueueDown[self.currentfloor] and not self.IsOrdersAbove(self.currentfloor)):
             return True
         else:
             return False
@@ -159,7 +163,7 @@ class Elevator(object):
 
     def IsOrdersAbove(self, Floor):
         # Iterate over the floors above and check for orders:
-        for i in range(self.currentfloor+1, self.floors):
+        for i in range(Floor+1, self.floors):
             # Error handling in-case operator put in floors below 0
             try:
                 # if there are any orders above pending in any queue
@@ -171,7 +175,7 @@ class Elevator(object):
 
     def IsOrdersBelow(self, Floor):
         # Iterate over the Queue and check if there are orders below floor argument:
-        for i in range(self.currentfloor-1, -1, -1):
+        for i in range(Floor-1, -1, -1):
             # Adding som error handling in-case operator put in too big floor
             try:
                 # if there are any orders below pending in any queue
