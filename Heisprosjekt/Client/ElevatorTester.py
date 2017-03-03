@@ -1,7 +1,7 @@
 from Elevator import Elevator
 from threading import Lock,Thread
 from ButtonsPressed import ButtonsPressed
-from LightCtrl import *
+
 
 elevator = Elevator()
 mutex = Lock()
@@ -15,14 +15,13 @@ def ButtonThread():
         pressed = ButtonsPressed()
         #print dumps(elevator.Queue)
         if pressed:
-            floor, button = pressed
-            mutex.acquire()
-            elevator.Queue[button][floor] = True
-            mutex.release()
-            SetLigth(floor, button)
-        else:
-            pass
+            floor, button, externalorder = pressed
+            if externalorder:
 
+
+            else:
+                mutex.aquire()
+                elevator.InternalQueue[floor] = True
 
 
 
