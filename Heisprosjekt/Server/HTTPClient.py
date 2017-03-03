@@ -1,7 +1,7 @@
 import socket
 from Client import Client
 from QueueMaster import QueueMaster
-from httplib import HTTPConnection
+from httplib import HTTPConnection, BadStatusLine, CannotSendRequest
 from json import dumps, loads
 
 
@@ -33,22 +33,21 @@ class HttpClient(object):
                     return loads(response.reason)
                 else:
                     return None
-            except (socket.error, TypeError):
-                self.connected = False
+            except (socket.error, TypeError, BadStatusLine, CannotSendRequest):
                 return None
 
     def GetRequest(self, path=""):
         try:
             self.client.connect()
             # Send the request as a path
-            self.client.request("POST", path)
+            self.client.request("GET", path)
             # wait for response:
             response = self.client.getresponse()
             # Check if the status is OK:
             if (response.status == 200):
                 self.connected = True
                 backup = QueueMaster()
-                backup.fromJson(response.msg)
+                backup.fromJson(response.reason)
                 return backup
         except (socket.error, TypeError):
             self.connected = False

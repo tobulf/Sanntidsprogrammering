@@ -10,12 +10,13 @@ from TypeClasses import*
 
 # Testing shit
 Bcast = "129.241.187.255"
-IP    = "129.241.187.150"
+IP    = "129.241.187.156"
 Port  = 20010
 
 
 # Declare the queuemasterobject for this server
-queuemaster = QueueMaster()
+#global Queuemaster
+Queuemaster = QueueMaster()
 
 # RequestHandler which Does all the work for the server:
 class RequestHandler(BaseHTTPRequestHandler):
@@ -30,43 +31,53 @@ class RequestHandler(BaseHTTPRequestHandler):
             if self.path == "Got Order":
                 # Load Clientobject from json
                 Clientobject.fromJson(body)
-                answer = queuemaster.GotOrder(Clientobject).toJson()
+                answer = Queuemaster.GotOrder(Clientobject).toJson()
                 self.send_response(200, answer)  # Send the proper response and status
             elif self.path == "Get Update":
                 # Load Clientobject from json
                 Clientobject.fromJson(body)
-                answer = queuemaster.GetUpdate(Clientobject).toJson()
+                answer = Queuemaster.GetUpdate(Clientobject).toJson()
                 self.send_response(200, answer)  # Send the proper response and status
+            elif self.path == "Test":
+                self.send_response(200,dumps("hei"))
             else:
-                answer = "Path Dont exist"
+                answer = dumps("Path Dont exist")
                 self.send_response(404, dumps(answer)) #Send the proper response and status
         except TypeError:
             pass
 
     def do_GET(self):
         # Only dormant server post Get:
-        answer = queuemaster.toJson()
+        answer = Queuemaster.toJson()
         self.send_response(200, answer)
 
 Handler = RequestHandler
 server  = HttpServer(IP, Port, Handler)
 server.serving = True
 heartbeat = UdpClient(Bcast, IP, Port)
-state = ServerState.Listening
 # Declares a Client, binds it to port zero and local.
-backupclient  = HttpClient("",0)
+backupclient = HttpClient("",0)
 # Mutex
 Mutex = Lock()
 
+
+#server.Serve()
+
 def Threadfunction1():
     while True:
+        global Queuemaster
         if heartbeat.ServingServer:
-            # Serve request:
-            server.ServeOnce()
-            # Check for Timeouts
-            queuemaster.CheckTimeout()
+            try:
+                # Serve request:
+                server.ServeOnce()
+                # Check for Timeouts
+                Queuemaster.CheckTimeout()
+            except AttributeError:
+                print "error"
+                pass
         else:
-            queuemaster = backupclient.GetRequest()
+            if backupclient.connected:
+                Queuemaster = backupclient.GetRequest()
 
 
 
@@ -75,9 +86,7 @@ def Threadfunction2():
         if heartbeat.ServingServer:
             heartbeat.Heartbeat()
         else:
-            Mutex.acquire()
             heartbeat.ServerListen()
-            Mutex.release()
             if heartbeat.ServingServer:
                 pass
             else:
