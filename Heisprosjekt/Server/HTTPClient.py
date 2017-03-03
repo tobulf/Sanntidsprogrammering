@@ -1,10 +1,11 @@
-from BaseHTTPServer import HTTPServer
 import socket
+from Client import Client
+from QueueMaster import QueueMaster
 from httplib import HTTPConnection
 from json import dumps, loads
 
 
-# kk
+
 
 class HttpClient(object):
     def __init__(self, address, port):
@@ -16,7 +17,6 @@ class HttpClient(object):
 
     def PostRequest(self, path, message):
         if self.connected:
-            received = [0]
             # Error handler, handles if not connected and if json doesnt work
             # If there is an error only returns a list with one element which is zero.
             try:
@@ -28,15 +28,16 @@ class HttpClient(object):
                 # wait for response:
                 response = self.client.getresponse()
                 # Check if the status is OK:
-                if (response.status == 200):
-                    received = loads(response.reason)
+                if response.status == 200:
                     self.connected = True
+                    return loads(response.reason)
+                else:
+                    return None
             except (socket.error, TypeError):
                 self.connected = False
-                pass
-            return received
+                return None
 
-    def GetRequest(self, path):
+    def GetRequest(self, path=""):
         try:
             self.client.connect()
             # Send the request as a path
@@ -46,46 +47,9 @@ class HttpClient(object):
             # Check if the status is OK:
             if (response.status == 200):
                 self.connected = True
+                backup = QueueMaster()
+                backup.fromJson(response.msg)
+                return backup
         except (socket.error, TypeError):
             self.connected = False
             pass
-
-
-class HttpServer(object):
-    def __init__(self, address, port, RequestHandler):
-        self.address = (address, port)
-        self.server  = HTTPServer(self.address, RequestHandler)
-        # Initially server is not serving:
-        self.serving = False
-
-    def ServeOnce(self):
-        # Serves only once when called
-        if self.serving:
-            self.server.handle_request()
-
-    def Serve(self):
-        # Serves as long as it is set to serve:
-        while self.serving:
-            self.server.handle_request()
-
-    def ServeForever(self):
-        # Serves forever:
-        self.server.serve_forever()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
