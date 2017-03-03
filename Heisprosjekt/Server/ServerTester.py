@@ -1,5 +1,6 @@
-from HTTPClient import HttpClient
 from Heisprosjekt.Server.Client import Client
+
+from Sanntidsprogrammering.Heisprosjekt.Client.HTTPClient import HttpClient
 
 IP    = "129.241.187.150"
 Port  = 20010

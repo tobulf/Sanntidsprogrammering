@@ -1,12 +1,13 @@
 from BaseHTTPServer import BaseHTTPRequestHandler
 from json import dumps
 from threading import Thread,Lock
-from HTTPServer import HttpServer
-from HTTPClient import HttpClient
+
 from Client import Client
+from HTTPServer import HttpServer
 from QueueMaster import QueueMaster
-from UDPClient  import UdpClient
+from Sanntidsprogrammering.Heisprosjekt.Client.HTTPClient import HttpClient
 from TypeClasses import*
+from UDPClient  import UdpClient
 
 # Testing shit
 Bcast = "129.241.187.255"

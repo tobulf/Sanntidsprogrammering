@@ -1,5 +1,6 @@
-from TypeClasses import *
 from Elev import elev
+from Client import Client
+
 
 
 # Kills all the lights when the elevator arrives at a floor
@@ -9,4 +10,3 @@ def KillLights(Floor):
 
 def SetLigth(Floor, LampType):
     elev.set_button_lamp(LampType, Floor, 1)
-

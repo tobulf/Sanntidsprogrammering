@@ -106,12 +106,14 @@ class QueueMaster(object):
         # Updates status:
         self.clientlist[index].connected = True
 
+
     def GotExternalOrders(self, Client):
         # Iterates trough the order lists and check if there are any orders:
         for i in range(Client.orderDown):
             if Client.orderDown[i] or Client.orderUp[i]:
                 return True
         return False
+
 
     def OrderCompleted(self, Order, Index):
         # Update the correct Ligthtlist and the Queue:
