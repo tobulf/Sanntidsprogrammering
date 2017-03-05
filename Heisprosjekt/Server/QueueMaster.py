@@ -34,6 +34,10 @@ class QueueMaster(object):
             # If a order has been executed:
             if Client.orderCompleted:
                 self.OrderCompleted(Client.orderCompleted, index)
+            # Update the ligthlist:
+            print dumps(self.LightListUp), dumps(self.LightListDown)
+            self.clientlist[index].lightsUp = self.LightListUp
+            self.clientlist[index].lightsDown = self.LightListDown
             return self.clientlist[index]
 
 
@@ -46,6 +50,10 @@ class QueueMaster(object):
         self.UpdateData(Client, index)
         # Pass on the order:
         self.PrioritizeOrder(Client.order)
+        # Update the ligthlist:
+        print dumps(self.LightListUp), dumps(self.LightListDown)
+        self.clientlist[index].lightsUp = self.LightListUp
+        self.clientlist[index].lightsDown = self.LightListDown
         # Returns possibly updated object:
         return self.clientlist[index]
 
@@ -79,7 +87,10 @@ class QueueMaster(object):
     # Internal Help-functions:
     def AddClient(self, Client):
         # If the client is not in the clientlist, it will be added:
-        if not self.GetClientIndex(Client.address):
+        index = self.GetClientIndex(Client.address)
+
+        if not index and len(self.clientlist) < 1:
+            #rint "New Client Added: ", Client.address
             # Adds the new client to the client list:
             self.clientlist.append(Client)
             # Each client has its own timer:
@@ -106,12 +117,14 @@ class QueueMaster(object):
         # Updates status:
         self.clientlist[index].connected = True
 
+
     def GotExternalOrders(self, Client):
         # Iterates trough the order lists and check if there are any orders:
         for i in range(Client.orderDown):
             if Client.orderDown[i] or Client.orderUp[i]:
                 return True
         return False
+
 
     def OrderCompleted(self, Order, Index):
         # Update the correct Ligthtlist and the Queue:

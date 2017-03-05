@@ -39,7 +39,7 @@ class UdpClient(object):
             # if there is nothing in the buffer it throws an exception an passes.
             message = loads(data)
             if not message[0] == "im alive":
-                if not self.timer.start:
+                if not self.timer.started:
                     self.timer.StartTimer()
                 elif self.timer.GetCurrentTime() > 3:
                     self.ServingServer = True

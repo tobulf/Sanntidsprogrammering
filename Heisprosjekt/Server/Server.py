@@ -10,7 +10,7 @@ from TypeClasses import*
 
 # Testing shit
 Bcast = "129.241.187.255"
-IP    = "129.241.187.156"
+IP    = "129.241.187.141"
 Port  = 20010
 
 
