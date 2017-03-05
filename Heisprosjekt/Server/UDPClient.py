@@ -7,9 +7,9 @@ class UdpClient(object):
         self.timer = Timer()
         self.Address       = (Bcast, Port)
         self.Port          = Port
-        self.ServingAdress = (IP, Port)
+        self.ServingAdress = IP
         self.imAliveMsg    = ["im alive", self.ServingAdress]
-        self.ServerAdress  = "" , 0
+        self.ServerAdress  = ""
         self.ServingServer = False
         self.client        = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
         # standard variables, im alive message and if the client is serving.
@@ -45,8 +45,8 @@ class UdpClient(object):
                     self.ServingServer = True
                     self.timer.StopTimer()
             elif message[0] == "im alive" and not self.ServingServer:
-                # Store the other server adress for backup:
-                self.ServerAdress = [message[1], message[2]]
+                # Store the other server address for backup:
+                self.ServerAdress = message[1]
                 self.ServingServer = False
         except (socket.error, TypeError, ValueError):
             if not self.timer.started:
