@@ -1,7 +1,7 @@
 from Elev import elev
 from time import sleep
 from Timer import Timer
-from LightCtrl import KillLights
+from LightCtrl import KillLight
 from TypeClasses import *
 from threading import Lock
 mutex = Lock()
@@ -9,15 +9,15 @@ mutex = Lock()
 class Elevator(object):
     # when you initialise the class, you also initialise the elevator, goes to first floor.
     def __init__(self, Floors = 4):
+        # Importing the driverClass:
         self.elev = elev
         # Number of floors:
         self.floors = Floors
-
-        # Elevator current state, and previous state
+        # Internal Timer:
+        self.timer = Timer()
+        # Elevator current state, and previous state:
         self.currentstate = Elevator_state.IDLE
         self.prevstate = Elevator_state.IDLE
-        # Internal timer:
-        self.timer = Timer()
         # Initially the elevator is just IDLE in 1st floor:
         self.direction = Motor_direction.DIRN_STOP
         # Initialize a internal queue with no orders:
@@ -68,7 +68,7 @@ class Elevator(object):
                     # If it was running, then it stopped due to an order at the current flor. Opens door.
                     self.OpenDoor()
                     # Turns of all the lights at the floor it arrived at:
-                    KillLights(self.currentfloor)
+                    KillLight(self.currentfloor, LampType.ButtonCommand)
                     # Deletes the order from the Queue, assumes everyone enters/exits the elevator when the door open:
                     self.InternalQueue[self.currentfloor] = False
                     self.ExternalQueueDown[self.currentfloor] = False
@@ -96,7 +96,7 @@ class Elevator(object):
                     # if the button is pressed when the lift is already on the floor:
                     if self.StopAtFloor():
                         # Kill all lights on the floor:
-                        KillLights(self.currentfloor)
+                        KillLight(self.currentfloor, LampType.ButtonCommand)
                         # Using mutex to avoid Concurrency
                         mutex.acquire()
                         # delete orders from Queues
@@ -140,7 +140,7 @@ class Elevator(object):
             sleep(3)
             # If Passenger holds the Command button, the elevator waits for a maximum of 10 more seconds:
             self.timer.StartTimer()
-            while self.timer.GetCurrentTime() < 10 and self.elev.get_buttonsignal(Lamp_type.BUTTON_COMMAND, self.elev.get_floor_sensor_signal()):
+            while self.timer.GetCurrentTime() < 10 and self.elev.get_buttonsignal(LampType.ButtonCommand, self.elev.get_floor_sensor_signal()):
                 pass
             self.timer.StopTimer()
             # Close the door:

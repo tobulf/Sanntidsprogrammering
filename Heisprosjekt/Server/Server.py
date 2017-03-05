@@ -5,13 +5,13 @@ from threading import Thread,Lock
 from Client import Client
 from HTTPServer import HttpServer
 from QueueMaster import QueueMaster
-from Sanntidsprogrammering.Heisprosjekt.Client.HTTPClient import HttpClient
+from HTTPClient import HttpClient
 from TypeClasses import*
 from UDPClient  import UdpClient
 
 # Testing shit
 Bcast = "129.241.187.255"
-IP    = "129.241.187.150"
+IP    = "129.241.187.143"
 Port  = 20010
 
 

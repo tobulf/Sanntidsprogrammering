@@ -36,15 +36,18 @@ class Client(object):
 
     def fromJson(self, Data):
         # Take in serialized object and construct a dict:
-        self.dict = loads(Data)
-        # Decompose the dict into the new object:
-        self.address        = self.dict["address"]
-        self.order          = self.dict["order"]
-        self.orderCompleted = self.dict["orderCompleted"]
-        self.direction      = self.dict["direction"]
-        self.orderDown      = self.dict["orderDown"]
-        self.orderUp        = self.dict["orderUp"]
-        self.internalOrders = self.dict["internalOrders"]
-        self.position       = self.dict["position"]
-        self.lightsUp       = self.dict["lightsUp"]
-        self.lightsDown     = self.dict["lightsDown"]
+        try:
+            self.dict = loads(Data)
+            # Decompose the dict into the new object:
+            self.address        = self.dict["address"]
+            self.order          = self.dict["order"]
+            self.orderCompleted = self.dict["orderCompleted"]
+            self.direction      = self.dict["direction"]
+            self.orderDown      = self.dict["orderDown"]
+            self.orderUp        = self.dict["orderUp"]
+            self.internalOrders = self.dict["internalOrders"]
+            self.position       = self.dict["position"]
+            self.lightsUp       = self.dict["lightsUp"]
+            self.lightsDown     = self.dict["lightsDown"]
+        except ValueError, TypeError:
+            pass
