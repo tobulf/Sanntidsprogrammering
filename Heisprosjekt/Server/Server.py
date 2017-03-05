@@ -28,12 +28,12 @@ class RequestHandler(BaseHTTPRequestHandler):
             # Declare the Client object to receive:
             Clientobject = Client()
             # Answer is calculated and serialized directly
-            if self.path == "Got Order":
+            if self.path == "GotOrder":
                 # Load Clientobject from json
                 Clientobject.fromJson(body)
                 answer = Queuemaster.GotOrder(Clientobject).toJson()
                 self.send_response(200, answer)  # Send the proper response and status
-            elif self.path == "Get Update":
+            elif self.path == "GetUpdate":
                 # Load Clientobject from json
                 Clientobject.fromJson(body)
                 answer = Queuemaster.GetUpdate(Clientobject).toJson()
