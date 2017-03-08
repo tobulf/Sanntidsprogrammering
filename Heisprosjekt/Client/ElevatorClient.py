@@ -1,13 +1,13 @@
 from threading import Lock,Thread
-from time import sleep
 from LightCtrl import *
 from TypeClasses import *
 from ButtonsPressed import ButtonsPressed
+from Order import Order
 from Client import Client
 from Elevator import Elevator
 from HTTPClient import HttpClient
 from UDPClient import UdpServer
-from json import dumps
+
 
 
 Address = "129.241.187.143"
@@ -41,6 +41,8 @@ def UDPThread():
 
 
 def ButtonThread():
+    # Declare an orderobject to keep control of orders:
+    OrderObject = Order()
     while True:
         pressed = ButtonsPressed()
         # Basicaly a statemachine for the Client:
@@ -48,14 +50,14 @@ def ButtonThread():
         if pressed and ClientUDP.connected:
             floor, button, externalorder = pressed
             if externalorder:
-                mutex.acquire()
-                ClientObject = Client(Address=Address, Order=[floor, elevator.direction], Direction=elevator.direction, Position = elevator.currentfloor, InternalOrders = elevator.InternalQueue)
-                mutex.release()
+                ClientObject = Client(Address=Address, Order=[floor, elevator.direction], Direction=elevator.direction, Position = elevator.currentfloor, InternalOrders = elevator.InternalQueue, OrderCompleted = OrderObject.ExternalOrderServed(elevator.currentfloor, elevator.direction))
                 # Using mutex before making a request, to prevent concurrency if the order never gets trough:
                 ClientObject = Httpclient.PostRequest("GotOrder", ClientObject.toJson())
                 mutex.acquire()
                 if ClientObject:
-                    # Updating the orders with latest version:
+                    # Add Potential order:
+                    OrderObject.AppendOrder(ClientObject.order)
+                    # Update external queues_
                     elevator.ExternalQueueUp   = ClientObject.orderUp
                     elevator.ExternalQueueDown = ClientObject.orderDown
                 mutex.release()
@@ -69,18 +71,14 @@ def ButtonThread():
                 SetLigth(floor, LampType.ButtonCommand)
 
         elif not pressed and ClientUDP.connected:
-            mutex.acquire()
-            ClientObject = Client(Address=Address, Direction = elevator.direction, Position = elevator.currentfloor, InternalOrders = elevator.InternalQueue)
-            mutex.release()
+            ClientObject = Client(Address=Address, Direction = elevator.direction, Position = elevator.currentfloor, InternalOrders = elevator.InternalQueue, OrderCompleted = OrderObject.ExternalOrderServed(elevator.currentfloor, elevator.direction))
             ClientObject = Httpclient.PostRequest("GetUpdate", ClientObject.toJson())
-
             if ClientObject:
-                #print dumps(ClientObject.lightsDown), dumps(ClientObject.lightsUp)
+                OrderObject.AppendOrder(ClientObject.order)
                 mutex.acquire()
                 elevator.ExternalQueueUp = ClientObject.orderUp
                 elevator.ExternalQueueDown = ClientObject.orderDown
                 mutex.release()
-                #print dumps(elevator.ExternalQueueDown), dumps(elevator.ExternalQueueUp)
                 # Reset the lights for the external orders:
                 for i in range(elevator.floors):
                     if ClientObject.lightsDown[i]:

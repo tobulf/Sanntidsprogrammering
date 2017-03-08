@@ -65,7 +65,7 @@ def Threadfunction1():
             # Serve request:
             server.ServeOnce()
             # Check for Timeouts
-            queuemaster.CheckTimeout()
+            #queuemaster.CheckTimeout()
         else:
             queuemaster = backupclient.GetRequest()
 
