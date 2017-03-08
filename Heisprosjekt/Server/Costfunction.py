@@ -30,6 +30,8 @@ def GetLength(Queue, Direction, Target, Currentposition):
         elif Target > Currentposition and Direction == Motor_direction.DIRN_UP:
             #Return the total length up to the Target
             return LengthUpToTarget(Currentposition, Queue, Target)
+        elif Direction == Motor_direction.DIRN_STOP:
+            return 0
 
 
 def LengthUpToTarget(Position, Queue, Target, EndTarget = False):

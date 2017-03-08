@@ -6,16 +6,15 @@ from HTTPClient import HttpClient
 from Client import Client
 from QueueMaster import QueueMaster
 from UDPClient  import UdpClient
-from TypeClasses import*
+
 
 # Testing shit
 Bcast = "129.241.187.255"
-IP    = "129.241.187.141"
-Port  = 20010
+IP    = "129.241.187.143"
+Port  = 20011
 
 
 # Declare the queuemasterobject for this server
-#global Queuemaster
 Queuemaster = QueueMaster()
 
 # RequestHandler which Does all the work for the server:
@@ -73,7 +72,7 @@ def HTTPThread():
                 # Check for Timeouts
                 Queuemaster.CheckTimeout()
             except AttributeError:
-                print "error"
+                print "Error"
                 pass
         else:
             if backupclient.connected:

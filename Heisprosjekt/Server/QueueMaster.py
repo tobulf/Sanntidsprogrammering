@@ -7,10 +7,11 @@ from TypeClasses import *
 
 
 
-# Order = [floor, Direction]
+# Order = [floor, LampType]
+# Ordercomplete = [floor, Direction]
 
 class QueueMaster(object):
-    def __init__(self, Floors = 4, Timeout = 60):
+    def __init__(self, Floors = 4, Timeout = 99999999):
         # Client list and timerlist for all clients:
         self.clientlist      = []
         self.timerlist       = []
@@ -32,10 +33,12 @@ class QueueMaster(object):
             index = self.GetClientIndex(Client.address)
             self.UpdateData(Client, index)
             # If a order has been executed:
+            print Client.orderCompleted
             if Client.orderCompleted:
                 self.OrderCompleted(Client.orderCompleted, index)
             # Update the ligthlist:
             print dumps(self.LightListUp), dumps(self.LightListDown)
+            print dumps(self.clientlist[index].orderUp), dumps(self.clientlist[index].orderDown)
             self.clientlist[index].lightsUp = self.LightListUp
             self.clientlist[index].lightsDown = self.LightListDown
             return self.clientlist[index]
@@ -51,11 +54,27 @@ class QueueMaster(object):
         # Pass on the order:
         self.PrioritizeOrder(Client.order)
         # Update the ligthlist:
-        print dumps(self.LightListUp), dumps(self.LightListDown)
+        print dumps(self.LightListUp), dumps(self.clientlist[index].orderUp)
         self.clientlist[index].lightsUp = self.LightListUp
         self.clientlist[index].lightsDown = self.LightListDown
         # Returns possibly updated object:
         return self.clientlist[index]
+
+
+
+    def PrioritizeOrder(self, Order):
+        # The index is used to update the external Queue of the right client.
+        priorityIndex = FastestElevator(self.clientlist, Order[0])
+        # Adds the order to the Clients order List.
+        self.clientlist[priorityIndex].order = Order
+        if Order[1] == LampType.ButtonCallDown:
+            self.clientlist[priorityIndex].orderDown[Order[0]] = True
+            self.LightListDown[Order[0]] = True
+        elif Order[1] == LampType.ButtonCallUp:
+            self.clientlist[priorityIndex].orderUp[Order[0]] = True
+            self.LightListUp[Order[0]] = True
+        # Starts a timer to check if the given client serves the order.
+        self.timerlist[priorityIndex].StartTimer()
 
 
     def CheckTimeout(self):
@@ -66,8 +85,11 @@ class QueueMaster(object):
                 self.timerlist[i].StopTimer()
                 # Considers Client disconnected:
                 self.clientlist[i].connected = False
+                # Prints a message that an elevator has timed out:
+                print "TIMEOUT!!"
                 # Re prioritize external orders of given Client
                 self.Reprioritize(i)
+
 
 
 
@@ -77,10 +99,10 @@ class QueueMaster(object):
         for i in range(self.floors):
             # Reprioritize Both orders UP and DOWN:
             if self.clientlist[Index].orderUp:
-                order = [i, Motor_direction.DIRN_UP]
+                order = [i, LampType.ButtonCallUp]
                 self.PrioritizeOrder(order)
             if self.clientlist[Index].orderUp:
-                order = [i, Motor_direction.DIRN_DOWN]
+                order = [i, LampType.ButtonCallDown]
                 self.PrioritizeOrder(order)
 
 
@@ -88,7 +110,6 @@ class QueueMaster(object):
     def AddClient(self, Client):
         # If the client is not in the clientlist, it will be added:
         index = self.GetClientIndex(Client.address)
-
         if not index and len(self.clientlist) < 1:
             #rint "New Client Added: ", Client.address
             # Adds the new client to the client list:
@@ -128,9 +149,12 @@ class QueueMaster(object):
 
     def OrderCompleted(self, Order, Index):
         # Update the correct Ligthtlist and the Queue:
+        print "A ORDER IS COMPLETED!"
+        # Delete the order for the Client
+        self.clientlist[Index].order = None
         if Order[1] == Motor_direction.DIRN_DOWN:
-            self.LightListDown[Order[0]] = None
-            self.clientlist[Index].OrderDown = False
+            self.LightListDown[Order[0]] = False
+            self.clientlist[Index].orderDown[Order[0]] = False
             # Check for more external orders:
             if self.GotExternalOrders(self.clientlist[Index]):
                 # Reset timer:
@@ -140,8 +164,8 @@ class QueueMaster(object):
                 # Stop the timer
                 self.timerlist[Index].StopTimer()
         elif Order[1] == Motor_direction.DIRN_UP:
-            self.LightListUp[Order[0]] = None
-            self.clientlist[Index].OrderUp = False
+            self.LightListUp[Order[0]] = False
+            self.clientlist[Index].orderUp[Order[0]] = False
             # Check for more externalOrders:
             if self.GotExternalOrders(self.clientlist[Index]):
                 # Reset timer:
@@ -151,17 +175,6 @@ class QueueMaster(object):
                 # Stop the timer
                 self.timerlist[Index].StopTimer()
 
-    def PrioritizeOrder(self, Order):
-        # The index is used to update the external Queue of the right client.
-        priorityIndex = FastestElevator(self.clientlist, Order[0])
-        if Order[1] == Motor_direction.DIRN_DOWN:
-            self.clientlist[priorityIndex].orderDown[Order[0]] = True
-            self.LightListDown[Order[0]] = True
-        elif Order[1] == Motor_direction.DIRN_UP:
-            self.clientlist[priorityIndex].orderUp[Order[0]] = True
-            self.LightListUp[Order[0]] = True
-        # Starts a timer to check if the given client serves the order.
-        self.timerlist[priorityIndex].StartTimer()
 
 
 # Server to server interfaces:
