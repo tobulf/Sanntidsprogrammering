@@ -171,7 +171,7 @@ class QueueMaster(object):
             self.LightListUp[Order[0]] = False
             self.clientlist[Index].orderUp[Order[0]] = False
             #If the elevator is in the end, it should delete the oposite order.
-            if Order[0] == self.floors:
+            if Order[0] == self.floors-1:
                 self.LightListDown[Order[0]] = False
                 self.clientlist[Index].orderDown[Order[0]] = False
             # Check for more externalOrders:
