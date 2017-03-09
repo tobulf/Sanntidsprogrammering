@@ -3,6 +3,7 @@ from json import dumps, loads
 from Timer import Timer
 from Costfunction import FastestElevator
 from TypeClasses import *
+from time import sleep
 
 
 
@@ -11,7 +12,7 @@ from TypeClasses import *
 # Ordercomplete = [floor, Direction]
 
 class QueueMaster(object):
-    def __init__(self, Floors = 4, Timeout = 10):
+    def __init__(self, Floors = 4, Timeout = 3):
         # Client list and timerlist for all clients:
         self.clientlist      = []
         self.timerlist       = []
@@ -19,7 +20,7 @@ class QueueMaster(object):
         self.LightListUp   = [False]*Floors
         self.LightListDown = [False]*Floors
         # Variable for max amount of seconds a elevator can use on a Order:
-        self.timeout = Timeout
+        self.timeout = Timeout*Floors
         # Number of floors
         self.floors = Floors
 
@@ -34,7 +35,7 @@ class QueueMaster(object):
             index = self.GetClientIndex(Client.address)
             self.UpdateData(Client, index)
             # If a order has been executed:
-            print Client.orderCompleted
+            #print Client.orderCompleted
             if Client.orderCompleted:
                 self.OrderCompleted(Client.orderCompleted, index)
             # Update the ligthlist:
@@ -59,7 +60,7 @@ class QueueMaster(object):
         self.PrioritizeOrder(Client.order)
         # Update the ligthlist:
         print dumps(self.LightListUp), dumps(self.clientlist[index].orderUp)
-        self.clientlist[index].lightsUp = self.LightListUp
+        self.clientlist[index].lightsUp   = self.LightListUp
         self.clientlist[index].lightsDown = self.LightListDown
         # Returns possibly updated object:
         return self.clientlist[index]
@@ -70,8 +71,8 @@ class QueueMaster(object):
         # The index is used to update the external Queue of the right client.
         priorityIndex = FastestElevator(self.clientlist, Order[0])
         # Adds the order to the Clients order List.
+        print Order
         self.clientlist[priorityIndex].order = Order
-
         if Order[1] == LampType.ButtonCallDown:
             self.clientlist[priorityIndex].orderDown[Order[0]] = True
             self.LightListDown[Order[0]] = True
@@ -150,7 +151,7 @@ class QueueMaster(object):
 
     def GotExternalOrders(self, Client):
         # Iterates trough the order lists and check if there are any orders:
-        for i in range(Client.orderDown):
+        for i in range(self.floors):
             if Client.orderDown[i] or Client.orderUp[i]:
                 return True
         return False
@@ -162,20 +163,20 @@ class QueueMaster(object):
             print "A ORDER IS COMPLETED!"
         # Delete the order for the Client
         self.clientlist[Index].order = None
+
         if Order[1] == Motor_direction.DIRN_DOWN:
             self.LightListDown[Order[0]] = False
             self.clientlist[Index].orderDown[Order[0]] = False
+            self.timerlist[Index].StopTimer()
             if Order[0] == 0:
                 # If the elevator is in the end, it should delete the oposite order.
                 self.LightListUp[Order[0]] = False
                 self.clientlist[Index].orderUp[Order[0]] = False
-            # Check for more external orders:
+                # If the client has more orders start the timer again:
             if self.GotExternalOrders(self.clientlist[Index]):
-                # Reset timer:
+                # Start timer
                 self.timerlist[Index].StartTimer()
-            else:
-                # Stop the timer
-                self.timerlist[Index].StopTimer()
+
         elif Order[1] == Motor_direction.DIRN_UP:
             self.LightListUp[Order[0]] = False
             self.clientlist[Index].orderUp[Order[0]] = False
@@ -184,12 +185,11 @@ class QueueMaster(object):
                 self.LightListDown[Order[0]] = False
                 self.clientlist[Index].orderDown[Order[0]] = False
             # Check for more externalOrders:
+            self.timerlist[Index].StopTimer()
             if self.GotExternalOrders(self.clientlist[Index]):
-                # Reset timer:
+                # Start timer
                 self.timerlist[Index].StartTimer()
-            else:
-                # Stop the timer
-                self.timerlist[Index].StopTimer()
+
 
         elif Order[1] == Motor_direction.DIRN_STOP:
             self.LightListUp[Order[0]] = False
