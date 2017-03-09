@@ -1,7 +1,7 @@
 from threading import Lock,Thread
 from LightCtrl import *
 from TypeClasses import *
-from ButtonsPressed import ButtonsPressed
+from ButtonsPressed import *
 from Order import Order
 from Client import Client
 from Elevator import Elevator
@@ -47,8 +47,9 @@ def UDPThread():
 def ButtonThread():
     # Declare an orderobject to keep control of orders:
     OrderObject = Order()
+    Buttons = ButtonObject()
     while True:
-        pressed = ButtonsPressed()
+        pressed = Buttons.ButtonPressed()
         # Basicaly a statemachine for the Client:
         # Need some sort of thing for the client to tell that an order has been served.
         if pressed and ClientUDP.connected:
