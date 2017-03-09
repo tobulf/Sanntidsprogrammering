@@ -40,6 +40,7 @@ class QueueMaster(object):
             # Update the ligthlist:
             print dumps(self.LightListUp), dumps(self.LightListDown)
             print dumps(self.clientlist[index].orderUp), dumps(self.clientlist[index].orderDown)
+
             self.clientlist[index].lightsUp = self.LightListUp
             self.clientlist[index].lightsDown = self.LightListDown
             return self.clientlist[index]
@@ -47,6 +48,7 @@ class QueueMaster(object):
 
     def GotOrder(self, Client):
         print len(self.clientlist)
+        print len(self.timerlist)
         # Tries to add client
         self.AddClient(Client)
         # Finds index:
@@ -89,7 +91,8 @@ class QueueMaster(object):
                 # Considers Client disconnected:
                 self.clientlist[i].connected = False
                 # Prints a message that an elevator has timed out:
-                print "TIMEOUT!!"
+                for n in range(40):
+                    print "TIMEOUT!!"
                 # Re prioritize external orders of given Client
                 self.Reprioritize(i)
 
@@ -99,7 +102,7 @@ class QueueMaster(object):
     # when a timeout occurs it reprioritizes the Orders of the client that timed out
     def Reprioritize(self, Index):
         #Checks all floors for orders:
-        for i in range(self.floors):
+        for i in range(self.floors-1):
             # Reprioritize Both orders UP and DOWN:
             if self.clientlist[Index].orderUp[i]:
                 order = [i, LampType.ButtonCallUp]
@@ -155,7 +158,8 @@ class QueueMaster(object):
 
     def OrderCompleted(self, Order, Index):
         # Update the correct Ligthtlist and the Queue:
-        print "A ORDER IS COMPLETED!"
+        for i in range(40):
+            print "A ORDER IS COMPLETED!"
         # Delete the order for the Client
         self.clientlist[Index].order = None
         if Order[1] == Motor_direction.DIRN_DOWN:

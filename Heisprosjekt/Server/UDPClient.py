@@ -11,15 +11,14 @@ class UdpClient(object):
         self.imAliveMsg    = ["im alive", self.ServingAdress]
         self.ServerAdress  = ""
         self.ServingServer = False
-        self.client        = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-        # standard variables, im alive message and if the client is serving.
+        self.client        = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 
     def Heartbeat(self):
         # function to send out heartbeat signal on UDP
         # Set settings to broadcast:
-        self.client.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
-        self.client.setsockopt(socket.SOL_SOCKET,socket.SO_BROADCAST,1)
+        self.client.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.client.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         # serialize data with json:
         try:
             data = dumps(self.imAliveMsg)
@@ -31,7 +30,7 @@ class UdpClient(object):
 
     def ServerListen(self):
         self.client  = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-        self.client.bind(('',self.Port))
+        self.client.bind(('', self.Port))
         # Set possibility to check buffer even if its nothing there
         self.client.setblocking(0)
         try:
