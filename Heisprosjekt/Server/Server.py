@@ -94,7 +94,15 @@ def UDPThread():
                 backupclient = HttpClient(heartbeat.ServerAdress, Port)
                 Mutex.release()
 
-
+def MainThread():
+    Thread1 = Thread(target=HTTPThread, args=(), )
+    Thread2 = Thread(target=UDPThread, args=(), )
+    Thread1.daemon = True
+    Thread2.daemon = True
+    Thread2.start()
+    Thread1.start()
+    while True:
+        pass
 
 
 
@@ -102,16 +110,8 @@ def UDPThread():
 
 # several request Works fine, handler and server coping good, need only 2 threads!:
 
-def main():
-    Thread1 = Thread(target= HTTPThread, args = (),)
-    Thread2 = Thread(target= UDPThread, args = (),)
-    Thread2.start()
-    Thread1.start()
-    print "running"
-    Thread1.join()
-    Thread2.join()
-main()
 
+MainThread()
 
 
 
