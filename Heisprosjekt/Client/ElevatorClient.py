@@ -46,7 +46,6 @@ def UDPThread():
 
 def ButtonThread():
     # Declare an orderobject to keep control of orders:
-
     OrderObject = Order()
     while True:
         pressed = ButtonsPressed()
@@ -58,15 +57,23 @@ def ButtonThread():
                 ClientObject = Client(Address=Address, Order=[floor, elevator.direction], Direction=elevator.direction, Position = elevator.currentfloor, InternalOrders = elevator.InternalQueue, OrderCompleted = OrderObject.ExternalOrderServed(elevator.currentfloor, elevator.direction, elevator.currentstate))
                 # Using mutex before making a request, to prevent concurrency if the order never gets trough:
                 ClientObject = Httpclient.PostRequest("GotOrder", ClientObject.toJson())
-                mutex.acquire()
                 if ClientObject:
                     # Add Potential order:
                     OrderObject.AppendOrder(ClientObject.order)
                     # Update external queues
+                    mutex.acquire()
                     elevator.ExternalQueueUp   = OrderObject.orderUp
                     elevator.ExternalQueueDown = OrderObject.orderDown
-                mutex.release()
-                # Need to add lights here:
+                    mutex.release()
+                    for i in range(elevator.floors):
+                        if ClientObject.lightsDown[i]:
+                            SetLigth(i, LampType.ButtonCallDown)
+                        if ClientObject.lightsUp[i]:
+                            SetLigth(i, LampType.ButtonCallUp)
+                        if not ClientObject.lightsDown[i]:
+                            KillLight(i, LampType.ButtonCallDown)
+                        if not ClientObject.lightsUp[i]:
+                            KillLight(i, LampType.ButtonCallUp)
             else:
                 # if not an externalOrder, just add the order to internal queue:
                 mutex.acquire()

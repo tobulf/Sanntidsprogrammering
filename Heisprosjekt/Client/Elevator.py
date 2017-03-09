@@ -2,8 +2,9 @@ from Elev import elev
 from time import sleep
 from Timer import Timer
 from LightCtrl import KillLight
-from TypeClasses import *
+from TypeClasses import*
 from threading import Lock
+
 mutex = Lock()
 
 class Elevator(object):
@@ -187,31 +188,4 @@ class Elevator(object):
             except IndexError:
                 pass
         return False
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

@@ -33,6 +33,7 @@ class Order(object):
         elif Direction == Motor_direction.DIRN_UP and Floor == (self.floors-1) and self.orderDown[Floor]:
             self.DeleteOrder(Floor, Motor_direction.DIRN_DOWN)
             return [Floor, Motor_direction.DIRN_DOWN]
+
         elif State == Elevator_state.IDLE:
             if self.orderDown[Floor]:
                 self.DeleteOrder(Floor, Motor_direction.DIRN_DOWN)
@@ -64,18 +65,3 @@ class Order(object):
                     self.orderDown[Order[0]] = True
             elif Order[1] == LampType.ButtonCallUp:
                     self.orderUp[Order[0]] = True
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
