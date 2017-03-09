@@ -9,7 +9,9 @@ class UdpServer(object):
         # Internal timer:
         self.timer = Timer()
         # Making a socketserver:
-        self.server  = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+        self.server  = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        #self.server.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server.bind(self.Address)
         # Set possibility to check buffer even if its nothing there
         self.server.setblocking(0)
