@@ -1,6 +1,6 @@
 import socket
 from Client import Client
-from httplib import HTTPConnection
+from httplib import *
 
 from json import loads
 
@@ -33,7 +33,7 @@ class HttpClient(object):
                     return Clientobject
                 else:
                     return None
-            except (socket.error, TypeError):
+            except (socket.error, TypeError, BadStatusLine):
                 self.connected = False
                 return None
 

@@ -91,6 +91,7 @@ class Elevator(object):
                     else:
                         self.currentstate = Elevator_state.IDLE
                         self.prevstate =  Elevator_state.IDLE
+
                 # If the elevator is IDLE or has served the floors in current direction it takes the first and best order.
                 elif self.prevstate == Elevator_state.IDLE:
                     # if the button is pressed when the lift is already on the floor:
@@ -122,6 +123,8 @@ class Elevator(object):
                         self.direction = Motor_direction.DIRN_DOWN
                         mutex.release()
                         self.currentstate = Elevator_state.RUNNING
+
+
             # Implement when the time comes... maybe never
             elif self.currentstate == Elevator_state.OBSTRUCTION:
                 pass
@@ -156,6 +159,7 @@ class Elevator(object):
             return True
         elif self.InternalQueue[self.currentfloor] or (self.ExternalQueueUp[self.currentfloor] and self.direction == Motor_direction.DIRN_UP) or (self.ExternalQueueDown[self.currentfloor] and not self.IsOrdersAbove(self.currentfloor)):
             return True
+
         else:
             return False
 

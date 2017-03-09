@@ -7,11 +7,12 @@ from Client import Client
 from Elevator import Elevator
 from HTTPClient import HttpClient
 from UDPClient import UdpServer
+from time import sleep
 
 
 
-Address = "129.241.187.143"
-Port = 20010
+Address = "129.241.187.151"
+Port = 20011
 elevator = Elevator()
 mutex = Lock()
 Httpclient = HttpClient("", Port)
@@ -42,6 +43,7 @@ def UDPThread():
 
 def ButtonThread():
     # Declare an orderobject to keep control of orders:
+
     OrderObject = Order()
     while True:
         pressed = ButtonsPressed()
@@ -50,16 +52,16 @@ def ButtonThread():
         if pressed and ClientUDP.connected:
             floor, button, externalorder = pressed
             if externalorder:
-                ClientObject = Client(Address=Address, Order=[floor, elevator.direction], Direction=elevator.direction, Position = elevator.currentfloor, InternalOrders = elevator.InternalQueue, OrderCompleted = OrderObject.ExternalOrderServed(elevator.currentfloor, elevator.direction))
+                ClientObject = Client(Address=Address, Order=[floor, elevator.direction], Direction=elevator.direction, Position = elevator.currentfloor, InternalOrders = elevator.InternalQueue, OrderCompleted = OrderObject.ExternalOrderServed(elevator.currentfloor, elevator.direction, elevator.currentstate))
                 # Using mutex before making a request, to prevent concurrency if the order never gets trough:
                 ClientObject = Httpclient.PostRequest("GotOrder", ClientObject.toJson())
                 mutex.acquire()
                 if ClientObject:
                     # Add Potential order:
                     OrderObject.AppendOrder(ClientObject.order)
-                    # Update external queues_
-                    elevator.ExternalQueueUp   = ClientObject.orderUp
-                    elevator.ExternalQueueDown = ClientObject.orderDown
+                    # Update external queues
+                    elevator.ExternalQueueUp   = OrderObject.orderUp
+                    elevator.ExternalQueueDown = OrderObject.orderDown
                 mutex.release()
                 # Need to add lights here:
             else:
@@ -71,23 +73,28 @@ def ButtonThread():
                 SetLigth(floor, LampType.ButtonCommand)
 
         elif not pressed and ClientUDP.connected:
-            ClientObject = Client(Address=Address, Direction = elevator.direction, Position = elevator.currentfloor, InternalOrders = elevator.InternalQueue, OrderCompleted = OrderObject.ExternalOrderServed(elevator.currentfloor, elevator.direction))
+            orderc = OrderObject.ExternalOrderServed(elevator.currentfloor, elevator.direction, elevator.currentstate)
+            print orderc
+            print OrderObject.orderUp, OrderObject.orderDown, elevator.currentfloor, elevator.direction, elevator.currentstate
+            ClientObject = Client(Address=Address, Direction = elevator.direction, Position = elevator.currentfloor, InternalOrders = elevator.InternalQueue, OrderCompleted = orderc)
             ClientObject = Httpclient.PostRequest("GetUpdate", ClientObject.toJson())
             if ClientObject:
+                print ClientObject.order
                 OrderObject.AppendOrder(ClientObject.order)
                 mutex.acquire()
-                elevator.ExternalQueueUp = ClientObject.orderUp
-                elevator.ExternalQueueDown = ClientObject.orderDown
+                elevator.ExternalQueueUp = OrderObject.orderUp
+                elevator.ExternalQueueDown = OrderObject.orderDown
                 mutex.release()
                 # Reset the lights for the external orders:
+                #print ClientObject.lightsDown, ClientObject.lightsUp
                 for i in range(elevator.floors):
                     if ClientObject.lightsDown[i]:
                         SetLigth(i, LampType.ButtonCallDown)
-                    elif ClientObject.lightsUp[i]:
+                    if ClientObject.lightsUp[i]:
                         SetLigth(i, LampType.ButtonCallUp)
-                    elif not ClientObject.lightsDown[i]:
+                    if not ClientObject.lightsDown[i]:
                         KillLight(i, LampType.ButtonCallDown)
-                    elif not ClientObject.lightsDown[i]:
+                    if not ClientObject.lightsUp[i]:
                         KillLight(i, LampType.ButtonCallUp)
 
 
@@ -120,22 +127,25 @@ def ButtonThread():
 
 
 
-def main():
+def MainThread():
     # Declaring all threads;
     Thread1 = Thread(target = ButtonThread, args = (),)
     Thread2 = Thread(target = ElevatorThread, args = (),)
     Thread3 = Thread(target = UDPThread, args = (),)
+    # Making all threads Sub-Threads
+    Thread1.daemon = True
+    Thread2.daemon = True
+    Thread3.daemon = True
     # Starting threads
     Thread1.start()
     Thread2.start()
     Thread3.start()
-    # wait for Threads to finish, if so its something wrong.
-    Thread1.join()
-    Thread2.join()
-    Thread3.join()
+    # Keep the main Thread Alive:
+    while True:
+        pass
 
 
-main()
+MainThread()
 
 
 
