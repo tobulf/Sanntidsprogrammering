@@ -10,7 +10,7 @@ from UDPClient  import UdpClient
 
 # Testing shit
 Bcast = "129.241.187.255"
-IP    = "129.241.187.143"
+IP    = "129.241.187.153"
 Port  = 20011
 
 
