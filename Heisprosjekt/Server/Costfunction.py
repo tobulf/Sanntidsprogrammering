@@ -1,13 +1,12 @@
 from TypeClasses import *
-
+from time import sleep
 # Insane COSTFUNCTION!
 
-def FastestElevator(Clientlist, externalorder):
+def FastestElevator(Clientlist, Externalorder):
     Clientindex = -1
     Length = -1
     for i in range(len(Clientlist)):
-        temp = GetLength(Clientlist[i].orderUp, Clientlist[i].direction, externalorder, Clientlist[i].position)
-        #temp += GetLength(Clientlist[i].orderDown, Clientlist[i].direction, externalorder, Clientlist[i].position)
+        temp = GetLength(Clientlist[i].orderUp, Clientlist[i].orderDown, Clientlist[i].internalOrders, Clientlist[i].direction, Externalorder, Clientlist[i].position)
         # Only considers Clients that is connected:
         if Length == -1 and Clientlist[i].connected:
             Length = temp
@@ -18,21 +17,15 @@ def FastestElevator(Clientlist, externalorder):
     return Clientindex
 
 
-def GetLength(Queue, Direction, Target, Currentposition):
-        if Target < Currentposition and Direction == Motor_direction.DIRN_DOWN:
-            #Return the total length down to the Target
-            return LengthDownToTarget(Currentposition, Queue, Target)
-        elif Target > Currentposition and Direction == Motor_direction.DIRN_DOWN:
-            #Return the total length down to the Last order, then back up to the Target
-            return LengthDownToTarget(Currentposition, Queue, 0, EndTarget=True) + LengthUpToTarget(0, Queue, Target)
-        elif Target < Currentposition and Direction == Motor_direction.DIRN_UP:
-            #Return the total length up to the Last order, then back down to the Target
-            return LengthUpToTarget(Currentposition, Queue, len(Queue)-1, EndTarget=True) + LengthDownToTarget(len(Queue)-1, Queue, Target)
-        elif Target > Currentposition and Direction == Motor_direction.DIRN_UP:
-            #Return the total length up to the Target
-            return LengthUpToTarget(Currentposition, Queue, Target)
-        elif Direction == Motor_direction.DIRN_STOP:
-            return 0
+def GetLength(QueueUp, QueueDown, InternalQueue, Direction, Order, Currentposition):
+    if Direction == Motor_direction.DIRN_DOWN and Order[0] < Currentposition:
+        return LengthDownToTarget(Currentposition,QueueDown, Order[0])
+    elif Direction == Motor_direction.DIRN_DOWN and Order[0] > Currentposition:
+        return LengthUpToTarget(Currentposition, QueueUp, len(QueueUp)-1, EndTarget = True) + LengthDownToTarget(len(QueueUp)-1, QueueDown, Order[0])
+    elif Direction == Motor_direction.DIRN_UP and Order[0] < Currentposition:
+        return LengthUpToTarget(Currentposition, QueueUp, 0, EndTarget=True) + LengthDownToTarget(len(QueueDown), QueueDown, Order[0])
+    elif Direction == Motor_direction.DIRN_UP  and Order[0] > Currentposition:
+        return LengthUpToTarget(Currentposition, QueueUp, Order[0])
 
 
 def LengthUpToTarget(Position, Queue, Target, EndTarget = False):
@@ -66,7 +59,7 @@ def LengthDownToTarget(Position, Queue, Target, EndTarget = False):
         # Adding som error handling in-case operator put in too big floor
         try:
             if i == Target and Queue[i] and EndTarget:
-                orders+=2
+                orders += 2
                 return orders + iterations -1
             elif i == Target:
                 return orders + iterations -1

@@ -69,7 +69,7 @@ class QueueMaster(object):
 
     def PrioritizeOrder(self, Order):
         # The index is used to update the external Queue of the right client.
-        priorityIndex = FastestElevator(self.clientlist, Order[0])
+        priorityIndex = FastestElevator(self.clientlist, Order)
         # Adds the order to the Clients order List.
         print Order
         self.clientlist[priorityIndex].order = Order
