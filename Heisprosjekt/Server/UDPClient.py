@@ -47,7 +47,7 @@ class UdpClient(object):
             if not message[0] == "im alive":
                 if not self.timer.started:
                     self.timer.StartTimer()
-                elif self.timer.GetCurrentTime() > 3:
+                elif self.timer.GetCurrentTime() > 5:
                     self.ServingServer = True
                     self.timer.StopTimer()
             elif message[0] == "im alive" and not self.ServingServer:
@@ -58,7 +58,7 @@ class UdpClient(object):
             if not self.timer.started:
                     #starts the internal timer
                     self.timer.StartTimer()
-            elif self.timer.GetCurrentTime() > 3:
+            elif self.timer.GetCurrentTime() > 5:
                     #if It has gone more than Three seconds it considers itself as the serving server
                 self.ServingServer = True
                 # Make the port available again and stop timer:
