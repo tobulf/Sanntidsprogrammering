@@ -47,6 +47,7 @@ def UDPThread():
 def ButtonThread():
     # Declare an orderobject to keep control of orders:
     OrderObject = Order()
+    # Declaring Buttonobject, to poll buttons:
     Buttons = ButtonObject()
     while True:
         pressed = Buttons.ButtonPressed()
