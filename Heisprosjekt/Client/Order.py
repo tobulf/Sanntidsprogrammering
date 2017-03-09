@@ -1,5 +1,5 @@
 from TypeClasses import*
-
+from Client import Client
 
 
 class Order(object):
@@ -53,15 +53,7 @@ class Order(object):
         elif Direction == Motor_direction.DIRN_DOWN:
             self.orderDown[Floor] = False
 
-    def AppendOrder(self, Order):
+    def AppendOrder(self, Order, ClientObject):
         # Assert that there is an order to add:
-        if Order:
-            # Add order correctly
-            if Order[1] == Motor_direction.DIRN_DOWN:
-                self.orderDown[Order[0]] = True
-            elif Order[1] == Motor_direction.DIRN_UP:
-                self.orderUp[Order[0]] = True
-            elif Order[1] == LampType.ButtonCallDown:
-                    self.orderDown[Order[0]] = True
-            elif Order[1] == LampType.ButtonCallUp:
-                    self.orderUp[Order[0]] = True
+        self.orderDown = ClientObject.orderDown
+        self.orderUp = ClientObject.orderUp
