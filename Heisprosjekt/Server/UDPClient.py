@@ -1,4 +1,5 @@
 import socket
+from socket import error
 from json import dumps, loads
 from Timer import Timer
 
@@ -12,25 +13,31 @@ class UdpClient(object):
         self.ServerAdress  = ""
         self.ServingServer = False
         self.client        = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        
+        self.client.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.client.bind(('', self.Port))
 
 
     def Heartbeat(self):
         # function to send out heartbeat signal on UDP
         # Set settings to broadcast:
-        self.client.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.client.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        # serialize data with json:
+        # serialize data with json, catch eventual error:
         try:
             data = dumps(self.imAliveMsg)
         except TypeError:
-            data = "Error"
             pass
-        # send im alive signal:
-        self.client.sendto(data, (self.Address))
+        try:
+            # send im alive signal:
+            self.client.sendto(data, (self.Address))
+        except IOError as DC:
+            # If the networkCable is pulled, we catch the error and set the server to Not serving.
+            if DC.errno == 101:
+                print "disconnected!"
+                self.ServingServer = False
+            pass
 
     def ServerListen(self):
-        self.client  = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-        self.client.bind(('', self.Port))
         # Set possibility to check buffer even if its nothing there
         self.client.setblocking(0)
         try:
