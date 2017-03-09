@@ -7,12 +7,15 @@ from Client import Client
 from Elevator import Elevator
 from HTTPClient import HttpClient
 from UDPClient import UdpServer
+import netifaces as FindIP
 from time import sleep
 
-
-
-Address = "129.241.187.151"
+# Finding IP
+FindIP.ifaddresses('eth0')
+Address = FindIP.ifaddresses('eth0')[2][0]['addr']
 Port = 20011
+
+# Declaring vital objects:
 elevator = Elevator()
 mutex = Lock()
 Httpclient = HttpClient("", Port)
