@@ -6,11 +6,12 @@ from HTTPClient import HttpClient
 from Client import Client
 from QueueMaster import QueueMaster
 from UDPClient  import UdpClient
+import netifaces as FindIP
 
-
-# Testing shit
-Bcast = "129.241.187.255"
-IP    = "129.241.187.151"
+# Finding the IP:
+FindIP.ifaddresses('eth0')
+IP = FindIP.ifaddresses('eth0')[2][0]['addr']
+Bcast = FindIP.ifaddresses('eth0')[2][0]['broadcast']
 Port  = 20011
 
 
