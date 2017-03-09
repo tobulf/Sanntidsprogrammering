@@ -67,6 +67,7 @@ class QueueMaster(object):
         priorityIndex = FastestElevator(self.clientlist, Order[0])
         # Adds the order to the Clients order List.
         self.clientlist[priorityIndex].order = Order
+
         if Order[1] == LampType.ButtonCallDown:
             self.clientlist[priorityIndex].orderDown[Order[0]] = True
             self.LightListDown[Order[0]] = True
@@ -155,6 +156,10 @@ class QueueMaster(object):
         if Order[1] == Motor_direction.DIRN_DOWN:
             self.LightListDown[Order[0]] = False
             self.clientlist[Index].orderDown[Order[0]] = False
+            if Order[0] == 0:
+                # If the elevator is in the end, it should delete the oposite order.
+                self.LightListUp[Order[0]] = False
+                self.clientlist[Index].orderUp[Order[0]] = False
             # Check for more external orders:
             if self.GotExternalOrders(self.clientlist[Index]):
                 # Reset timer:
@@ -165,6 +170,10 @@ class QueueMaster(object):
         elif Order[1] == Motor_direction.DIRN_UP:
             self.LightListUp[Order[0]] = False
             self.clientlist[Index].orderUp[Order[0]] = False
+            #If the elevator is in the end, it should delete the oposite order.
+            if Order[0] == self.floors:
+                self.LightListDown[Order[0]] = False
+                self.clientlist[Index].orderDown[Order[0]] = False
             # Check for more externalOrders:
             if self.GotExternalOrders(self.clientlist[Index]):
                 # Reset timer:
