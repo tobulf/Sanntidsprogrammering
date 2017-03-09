@@ -158,7 +158,6 @@ class QueueMaster(object):
             # Check for more external orders:
             if self.GotExternalOrders(self.clientlist[Index]):
                 # Reset timer:
-                self.timerlist[Index].StopTimer()
                 self.timerlist[Index].StartTimer()
             else:
                 # Stop the timer
@@ -169,7 +168,19 @@ class QueueMaster(object):
             # Check for more externalOrders:
             if self.GotExternalOrders(self.clientlist[Index]):
                 # Reset timer:
+                self.timerlist[Index].StartTimer()
+            else:
+                # Stop the timer
                 self.timerlist[Index].StopTimer()
+
+        elif Order[1] == Motor_direction.DIRN_STOP:
+            self.LightListUp[Order[0]] = False
+            self.LightListDown[Order[0]] = False
+            self.clientlist[Index].orderUp[Order[0]] = False
+            self.clientlist[Index].orderDown[Order[0]] = False
+            # Check for more externalOrders:
+            if self.GotExternalOrders(self.clientlist[Index]):
+                # Reset timer:
                 self.timerlist[Index].StartTimer()
             else:
                 # Stop the timer
