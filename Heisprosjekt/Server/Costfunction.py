@@ -6,7 +6,8 @@ def FastestElevator(Clientlist, externalorder):
     Clientindex = -1
     Length = -1
     for i in range(len(Clientlist)):
-        temp = GetLength(Clientlist[i].internalOrders, Clientlist[i].direction, externalorder, Clientlist[i].position)
+        temp = GetLength(Clientlist[i].orderUp, Clientlist[i].direction, externalorder, Clientlist[i].position)
+        #temp += GetLength(Clientlist[i].orderDown, Clientlist[i].direction, externalorder, Clientlist[i].position)
         # Only considers Clients that is connected:
         if Length == -1 and Clientlist[i].connected:
             Length = temp

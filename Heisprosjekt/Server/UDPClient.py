@@ -55,5 +55,8 @@ class UdpClient(object):
             elif self.timer.GetCurrentTime() > 3:
                     #if It has gone more than Three seconds it considers itself as the serving server
                 self.ServingServer = True
+                # Make the port available again and stop timer:
+                self.client.close()
+                self.client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                 self.timer.StopTimer()
             pass

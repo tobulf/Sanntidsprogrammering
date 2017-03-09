@@ -11,7 +11,7 @@ from TypeClasses import *
 # Ordercomplete = [floor, Direction]
 
 class QueueMaster(object):
-    def __init__(self, Floors = 4, Timeout = 99999999):
+    def __init__(self, Floors = 4, Timeout = 10):
         # Client list and timerlist for all clients:
         self.clientlist      = []
         self.timerlist       = []
@@ -22,6 +22,7 @@ class QueueMaster(object):
         self.timeout = Timeout
         # Number of floors
         self.floors = Floors
+
 
 # Client-Server interfaces:
     def GetUpdate(self, Client):
@@ -45,6 +46,7 @@ class QueueMaster(object):
 
 
     def GotOrder(self, Client):
+        print len(self.clientlist)
         # Tries to add client
         self.AddClient(Client)
         # Finds index:
@@ -99,10 +101,10 @@ class QueueMaster(object):
         #Checks all floors for orders:
         for i in range(self.floors):
             # Reprioritize Both orders UP and DOWN:
-            if self.clientlist[Index].orderUp:
+            if self.clientlist[Index].orderUp[i]:
                 order = [i, LampType.ButtonCallUp]
                 self.PrioritizeOrder(order)
-            if self.clientlist[Index].orderUp:
+            if self.clientlist[Index].orderUp[i]:
                 order = [i, LampType.ButtonCallDown]
                 self.PrioritizeOrder(order)
 
@@ -111,13 +113,16 @@ class QueueMaster(object):
     def AddClient(self, Client):
         # If the client is not in the clientlist, it will be added:
         index = self.GetClientIndex(Client.address)
-        if not index and len(self.clientlist) < 1:
-            #rint "New Client Added: ", Client.address
+        if index == -1:
+            for i in range(10):
+                print "New Client Added: ", Client.address
+
             # Adds the new client to the client list:
             self.clientlist.append(Client)
             # Each client has its own timer:
             self.timerlist.append(Timer())
             return True
+
         return False
 
     def GetClientIndex(self, Clientaddress):
@@ -125,7 +130,7 @@ class QueueMaster(object):
         for i in range(len(self.clientlist)):
             if Clientaddress == self.clientlist[i].address:
                 return i
-        return False
+        return -1
 
 
     def UpdateData(self, Client, index):

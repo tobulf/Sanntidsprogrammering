@@ -10,7 +10,7 @@ from UDPClient  import UdpClient
 
 # Testing shit
 Bcast = "129.241.187.255"
-IP    = "129.241.187.153"
+IP    = "129.241.187.151"
 Port  = 20011
 
 
@@ -90,6 +90,7 @@ def UDPThread():
                 pass
             else:
                 # Bind the Client to the Ip and port of current serving server:
+                global backupclient
                 Mutex.acquire()
                 backupclient = HttpClient(heartbeat.ServerAdress, Port)
                 Mutex.release()
