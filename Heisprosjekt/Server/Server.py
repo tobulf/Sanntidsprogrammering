@@ -101,6 +101,7 @@ def MainThread():
     Thread2.daemon = True
     Thread2.start()
     Thread1.start()
+    print "Server Starting up..."
     while True:
         pass
 
