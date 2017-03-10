@@ -132,6 +132,7 @@ class QueueMaster(object):
     def GetClientIndex(self, Clientaddress):
         # Internal function to find the Client in the clientlist.
         for i in range(len(self.clientlist)):
+            print self.clientlist[i]
             if Clientaddress == self.clientlist[i].address:
                 return i
         return -1

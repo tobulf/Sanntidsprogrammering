@@ -9,6 +9,12 @@ class Motor_direction:
     DIRN_STOP =  0
     DIRN_UP   =  1
 
+class MotorDirection:
+    DirnDown = -1
+    DirnStop =  0
+    DirnUp   =  1
+
+
 class LampType:
     ButtonCallUp   = 0
     ButtonCallDown = 1

@@ -7,6 +7,7 @@ from Client import Client
 from QueueMaster import QueueMaster
 from UDPClient  import UdpClient
 import netifaces as FindIP
+from time import sleep
 
 # Finding the IP:
 FindIP.ifaddresses('eth0')
@@ -17,11 +18,19 @@ Port  = 20011
 
 # Declare the queuemasterobject for this server
 Queuemaster = QueueMaster()
+# Heartbeat object:
+heartbeat = UdpClient(Bcast, IP, Port)
+# Declares a Client, binds it to port zero and local.
+backupclient = HttpClient("",0)
+# Mutex
+Mutex = Lock()
+
 
 # RequestHandler which Does all the work for the server:
 class RequestHandler(BaseHTTPRequestHandler):
     # Custom made handler class for the Networkmodule:
     def do_POST(self):
+        global Queuemaster
         content_len = int(self.headers.getheader('content-length', 0)) #Finding the length of the response body
         body = self.rfile.read(content_len) #Extracting the body
         try:
@@ -47,25 +56,20 @@ class RequestHandler(BaseHTTPRequestHandler):
             pass
 
     def do_GET(self):
+        global Queuemaster
         # Only dormant server post Get:
         answer = Queuemaster.toJson()
         self.send_response(200, answer)
 
+
 Handler = RequestHandler
 server  = HttpServer(IP, Port, Handler)
 server.serving = True
-heartbeat = UdpClient(Bcast, IP, Port)
-# Declares a Client, binds it to port zero and local.
-backupclient = HttpClient("",0)
-# Mutex
-Mutex = Lock()
-
-
 #server.Serve()
 
 def HTTPThread():
+    global Queuemaster
     while True:
-        global Queuemaster
         if heartbeat.ServingServer:
             try:
                 # Serve request:
@@ -77,24 +81,29 @@ def HTTPThread():
                 pass
         else:
             if backupclient.connected:
-                Queuemaster = backupclient.GetRequest()
+                temp = backupclient.GetRequest()
+                if temp:
+                    Queuemaster = backupclient.GetRequest()
 
 
 
 def UDPThread():
     while True:
+        global backupclient
         if heartbeat.ServingServer:
             heartbeat.Heartbeat()
         else:
             heartbeat.ServerListen()
             if heartbeat.ServingServer:
-                pass
-            else:
+                backupclient.connected = False
+
+            elif not backupclient.connected and not heartbeat.ServingServer:
                 # Bind the Client to the Ip and port of current serving server:
-                global backupclient
                 Mutex.acquire()
                 backupclient = HttpClient(heartbeat.ServerAdress, Port)
                 Mutex.release()
+                backupclient.connected = True
+
 
 def MainThread():
     Thread1 = Thread(target=HTTPThread, args=(), )
