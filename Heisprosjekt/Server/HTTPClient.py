@@ -3,7 +3,7 @@ from Client import Client
 from QueueMaster import QueueMaster
 from httplib import *
 from json import dumps, loads
-
+from time import sleep
 
 
 
@@ -15,26 +15,6 @@ class HttpClient(object):
         # internal variable to check connection:
         self.connected = False
 
-    def PostRequest(self, path, message):
-        if self.connected:
-            # Error handler, handles if not connected and if json doesnt work
-            # If there is an error only returns a list with one element which is zero.
-            try:
-                self.client.connect()
-                # JSON encode the message:
-                data = dumps(message)
-                # Post a request with the message as body:
-                self.client.request("POST", path, data)
-                # wait for response:
-                response = self.client.getresponse()
-                # Check if the status is OK:
-                if response.status == 200:
-                    self.connected = True
-                    return loads(response.reason)
-                else:
-                    return None
-            except (socket.error, TypeError, BadStatusLine, CannotSendRequest):
-                return None
 
     def GetRequest(self, path=""):
         if self.connected:
@@ -48,9 +28,11 @@ class HttpClient(object):
                 if (response.status == 200):
                     self.connected = True
                     backup = QueueMaster()
-                    print response.reason
-                    backup.fromJson(response.reason)
-                    return backup
+                    if backup:
+                        backup.fromJson(response.reason)
+                    else:
+                        return None
             except (socket.error, TypeError, BadStatusLine):
                 self.connected = False
-                pass
+                return None
+

@@ -67,6 +67,7 @@ server  = HttpServer(IP, Port, Handler)
 server.serving = True
 #server.Serve()
 
+
 def HTTPThread():
     global Queuemaster
     while True:
@@ -84,7 +85,6 @@ def HTTPThread():
                 temp = backupclient.GetRequest()
                 if temp:
                     Queuemaster = backupclient.GetRequest()
-
 
 
 def UDPThread():

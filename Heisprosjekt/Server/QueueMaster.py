@@ -132,8 +132,7 @@ class QueueMaster(object):
     def GetClientIndex(self, Clientaddress):
         # Internal function to find the Client in the clientlist.
         for i in range(len(self.clientlist)):
-            print self.clientlist[i]
-            if Clientaddress == self.clientlist[i].address:
+             if Clientaddress == self.clientlist[i].address:
                 return i
         return -1
 
@@ -210,17 +209,24 @@ class QueueMaster(object):
 # Server to server interfaces:
 
     def toJson(self):
-        #serialise clientlist:
+        # Make a temporary list to manipulate
+        templist = [None]*len(self.clientlist)
+        # declare a temporary Queuemaster object to manipulate:
+        tempObj = QueueMaster()
+        # serialise clientlist:
         for i in range(len(self.clientlist)):
-            temp = self.clientlist[i]
-            self.clientlist[i] = temp.toJson()
-        temp = self.__dict__
+            temp = self.clientlist[i].toJson()
+            templist.append(temp)
+        tempObj.clientlist = templist
+        tempObj.LightListDown = self.LightListDown
+        tempObj.LightListUp = self.LightListUp
+        temp = tempObj.__dict__
         # Serialize every list and info, not the Timer list which is not serializable
         try:
-            return dumps({'clientlist':temp["clientlist"], 'LightListUp':temp["LightListUp"], 'LightListDown':temp["LightListDown"]})
+            return dumps({'clientlist':temp['clientlist'], 'LightListUp':temp['LightListUp'], 'LightListDown':temp['LightListDown']})
         except TypeError:
             # If some issue occurs it just returns nothing.
-            return ""
+            return dumps(None)
 
 
     def fromJson(self, data):
