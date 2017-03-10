@@ -210,7 +210,7 @@ class QueueMaster(object):
 
     def toJson(self):
         # Make a temporary list to manipulate
-        templist = [None]*len(self.clientlist)
+        templist = []
         # declare a temporary Queuemaster object to manipulate:
         tempObj = QueueMaster()
         # serialise clientlist:
@@ -240,6 +240,13 @@ class QueueMaster(object):
                 temp = self.clientlist[i]
                 self.clientlist[i] = Client()
                 self.clientlist[i].fromJson(temp)
+                # Adds a timer to all clients
+                if len(self.timerlist) != len(self.clientlist):
+                    # if there are not enough timers:
+                    self.timerlist.append(Timer())
+                # Starts all timers
+                self.timerlist[i].StartTimer()
+            print len(self.timerlist), len(self.clientlist)
         except TypeError:
             pass
 
