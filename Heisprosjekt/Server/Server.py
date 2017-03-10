@@ -7,7 +7,8 @@ from Client import Client
 from QueueMaster import QueueMaster
 from UDPClient  import UdpClient
 import netifaces as FindIP
-from time import sleep
+from Timer import Timer
+
 
 # Finding the IP:
 FindIP.ifaddresses('eth0')
@@ -24,6 +25,8 @@ heartbeat = UdpClient(Bcast, IP, Port)
 backupclient = HttpClient("",0)
 # Mutex
 Mutex = Lock()
+# Request-Timer T keep the Dormant server from Spamming to much requests:
+RequestTimer = Timer()
 
 
 # RequestHandler which Does all the work for the server:
@@ -65,13 +68,16 @@ class RequestHandler(BaseHTTPRequestHandler):
 Handler = RequestHandler
 server  = HttpServer(IP, Port, Handler)
 server.serving = True
+
 #server.Serve()
 
 
 def HTTPThread():
     global Queuemaster
+    RequestTimer.StartTimer()
     while True:
         if heartbeat.ServingServer:
+            RequestTimer.StopTimer()
             try:
                 # Serve request:
                 server.ServeOnce()
@@ -81,8 +87,10 @@ def HTTPThread():
                 print "Error"
                 pass
         else:
-            if backupclient.connected:
+            if backupclient.connected and RequestTimer.GetCurrentTime() > 0.1:
+                RequestTimer.StopTimer()
                 temp = backupclient.GetRequest()
+                RequestTimer.StartTimer()
                 if temp:
                     Queuemaster = backupclient.GetRequest()
 

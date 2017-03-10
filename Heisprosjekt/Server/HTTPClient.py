@@ -27,12 +27,15 @@ class HttpClient(object):
                 # Check if the status is OK:
                 if (response.status == 200):
                     self.connected = True
+                    data = response.reason
                     backup = QueueMaster()
+                    backup.fromJson(data)
                     if backup:
-                        backup.fromJson(response.reason)
+                        return backup
                     else:
                         return None
             except (socket.error, TypeError, BadStatusLine):
                 self.connected = False
+
                 return None
 
