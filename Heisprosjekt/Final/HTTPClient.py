@@ -1,5 +1,5 @@
 import socket
-from Client import Client
+from ClientObject import Client
 from QueueMaster import QueueMaster
 from httplib import *
 from json import dumps, loads
