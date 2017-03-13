@@ -28,8 +28,8 @@ class Elevator(object):
         self.direction = MotorDirection.DirnStop
         # Initialize a internal queue with no orders:
         self.InternalQueue = [False] * Floors
-        self.ExternalQueueDown = [False]*Floors # queue from external orders, determined by server
-        self.ExternalQueueUp = [False] * Floors # queue from external orders, determined by server
+        self.ExternalQueueDown = [False]*Floors  # queue from external orders, determined by server
+        self.ExternalQueueUp = [False] * Floors  # queue from external orders, determined by server
         # Initialise the elevator, Makes it go to 1st floor:
         self.elev.SetMotordirection(MotorDirection.DirnDown)
         while self.elev.GetFloorSensorSignal() == -1:

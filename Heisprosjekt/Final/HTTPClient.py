@@ -58,6 +58,5 @@ class HttpClient(object):
                         return None
             except (socket.error, TypeError, BadStatusLine):
                 self.connected = False
-
                 return None
 

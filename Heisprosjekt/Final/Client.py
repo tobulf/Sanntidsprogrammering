@@ -64,7 +64,10 @@ def ButtonThread(RefreshRate = 0.1, PrintRate = 1):
             floor, button, externalorder = pressed
             if externalorder:
                 # Declare a ClientObject which contain all necessary information to the server:
-                ClientObject = Client(Address=Address, Order=[floor, button], Direction=elevator.direction, Position=elevator.currentfloor, InternalOrders=elevator.InternalQueue, OrderCompleted=OrderObject.ExternalOrderServed(elevator.currentfloor, elevator.direction, elevator.currentstate), CurrentState=elevator.currentstate, OrderUp=OrderObject.orderUp, OrderDown=OrderObject.orderDown)
+                ClientObject = Client(Address=Address, Order=[floor, button], Direction=elevator.direction,
+                                      Position=elevator.currentfloor, InternalOrders=elevator.InternalQueue,
+                                      OrderCompleted=OrderObject.ExternalOrderServed(elevator.currentfloor, elevator.direction, elevator.currentstate),
+                                      CurrentState=elevator.currentstate, OrderUp=OrderObject.orderUp, OrderDown=OrderObject.orderDown)
                 # Using mutex before making a request, to prevent concurrency if the order never gets trough:
                 ClientObject = Httpclient.PostRequest("GotOrder", ClientObject.toJson())
                 if ClientObject:
@@ -107,7 +110,10 @@ def ButtonThread(RefreshRate = 0.1, PrintRate = 1):
             # Check if any orders ar served
             OrderCompleted = OrderObject.ExternalOrderServed(elevator.currentfloor, elevator.direction, elevator.currentstate)
             # Declare a ClientObject which contain all necessary information to the server:
-            ClientObject = Client(Address=Address, Direction = elevator.direction, Position=elevator.currentfloor, InternalOrders=elevator.InternalQueue, OrderCompleted=OrderCompleted, CurrentState=elevator.currentstate, OrderUp=OrderObject.orderUp, OrderDown=OrderObject.orderDown)
+            ClientObject = Client(Address=Address, Direction = elevator.direction, Position=elevator.currentfloor,
+                                  InternalOrders=elevator.InternalQueue, OrderCompleted=OrderCompleted,
+                                  CurrentState=elevator.currentstate, OrderUp=OrderObject.orderUp,
+                                  OrderDown=OrderObject.orderDown)
             ClientObject = Httpclient.PostRequest("GetUpdate", ClientObject.toJson())
             # Check if there are a Clientobject:
             if ClientObject:
@@ -160,6 +166,12 @@ def ButtonThread(RefreshRate = 0.1, PrintRate = 1):
                     KillLight(i, ButtonType.CallDown)
         # Kills the Network if the elevator has gone into errormode:
         if elevator.currentstate == ElevatorState.Error:
+            # Send the latest state:
+            ClientObject = Client(Address=Address, Direction=elevator.direction, Position=elevator.currentfloor,
+                                  InternalOrders=elevator.InternalQueue, OrderCompleted=OrderCompleted,
+                                  CurrentState=elevator.currentstate, OrderUp=OrderObject.orderUp,
+                                  OrderDown=OrderObject.orderDown)
+            Httpclient.PostRequest("GetUpdate", ClientObject.toJson())
             Respawn.Popen(["gnome-terminal", "-x", "sh", "-c", "python Client.py"])
             break
 
