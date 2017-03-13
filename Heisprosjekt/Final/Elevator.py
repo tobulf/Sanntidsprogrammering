@@ -37,8 +37,6 @@ class Elevator(object):
     def Serve(self, TimeOut = 5):
         while True:
             # This is basicaly a state Machine for the elevator:
-            print self.currentstate
-            
             if self.currentstate == ElevatorState.Running:
                 # Using mutex to avoid Concurrency
                 self.currentfloor = self.elev.get_floor_sensor_signal()
