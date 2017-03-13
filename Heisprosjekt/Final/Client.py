@@ -93,7 +93,7 @@ def ButtonThread(RefreshRate = 0.3):
                 mutex.release()
                 # Set the lights:
                 SetLigth(floor, LampType.Command)
-
+#
         elif not pressed and ClientUDP.connected and RequestTimer.GetCurrentTime() > RefreshRate:
             # Reset the Request-timer:
             RequestTimer.StartTimer()
