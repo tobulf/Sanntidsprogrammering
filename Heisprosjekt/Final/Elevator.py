@@ -39,9 +39,7 @@ class Elevator(object):
             # This is basicaly a state Machine for the elevator:
             if self.currentstate == ElevatorState.Running:
                 # Using mutex to avoid Concurrency
-                mutex.acquire()
                 self.currentfloor = self.elev.get_floor_sensor_signal()
-                mutex.release()
                 try:
                     assert(self.currentfloor != -1)
                     # If the elevator gets to a floor it will stop the timer:
@@ -67,7 +65,9 @@ class Elevator(object):
                     if not self.timer.started:
                         self.timer.StartTimer()
                     elif self.timer.GetCurrentTime() > TimeOut:
+                        # elevator considers itself stuck and stops:
                         self.currentstate = ElevatorState.Error
+                        self.elev.set_motordirection(MotorDirection.DirnStop)
                     pass
 
             elif self.currentstate == ElevatorState.Idle:
@@ -79,8 +79,11 @@ class Elevator(object):
                     KillLight(self.currentfloor, LampType.Command)
                     # Deletes the order from the Queue, assumes everyone enters/exits the elevator when the door open:
                     self.InternalQueue[self.currentfloor] = False
+                    # mutex to prevent concurrency
+                    mutex.acquire()
                     self.ExternalQueueDown[self.currentfloor] = False
                     self.ExternalQueueUp[self.currentfloor] = False
+                    mutex.release()
 
 
                     # If there are orders above and the elevator was running it continues in that direction.
@@ -107,29 +110,23 @@ class Elevator(object):
                         # Kill all lights on the floor:
                         KillLight(self.currentfloor, LampType.Command)
                         # Using mutex to avoid Concurrency
-                        mutex.acquire()
                         # delete orders from Queues
                         self.ExternalQueueDown[self.currentfloor] = False
                         self.ExternalQueueUp[self.currentfloor] = False
                         self.InternalQueue[self.currentfloor] = False
-                        mutex.release()
                         # Open the door
                         self.OpenDoor()
                     # Checks if there are orders below the elevator and starts serving these if any.
                     elif self.IsOrdersAbove(self.currentfloor):
                         self.elev.set_motordirection(MotorDirection.DirnUp)
                         # Using mutex to avoid Concurrency
-                        mutex.acquire()
                         self.direction = MotorDirection.DirnUp
-                        mutex.release()
                         self.currentstate = ElevatorState.Running
                     # Checks if there are orders above the elevator and starts serving these if any.
                     elif self.IsOrdersBelow(self.currentfloor):
                         self.elev.set_motordirection(MotorDirection.DirnDown)
                         # Using mutex to avoid Concurrency
-                        mutex.acquire()
                         self.direction = MotorDirection.DirnDown
-                        mutex.release()
                         self.currentstate = ElevatorState.Running
 
 
