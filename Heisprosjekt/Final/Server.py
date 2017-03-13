@@ -97,7 +97,9 @@ def HTTPThread(RefreshRate = 0.1):
                     Queuemaster = backup
 
 
-def UDPThread():
+def UDPThread(PrintRate = 1):
+    printTimer = Timer()
+    printTimer.StartTimer()
     while True:
         global backupclient
         if heartbeat.ServingServer:
@@ -114,6 +116,11 @@ def UDPThread():
                 backupclient = HttpClient(heartbeat.ServerAdress, Port)
                 Mutex.release()
                 backupclient.connected = True
+            # Little print function:
+            if printTimer.GetCurrentTime() > PrintRate:
+                printTimer.StartTimer()
+                print "______________________________________________________"
+                print "Currently dormant getting backup from: ", heartbeat.ServerAdress
 
 def MainThread():
     # 2 Threads, one for the UDP and one for HTTP

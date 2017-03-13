@@ -2,6 +2,8 @@ from threading import Lock, Thread
 from LightCtrl import *
 from TypeClasses import *
 from ButtonsPressed import *
+from sys import exit
+import subprocess as Respawn
 from Order import Order
 from ClientObject import Client
 from Elevator import Elevator
@@ -54,19 +56,9 @@ def ButtonThread(RefreshRate = 0.1, PrintRate = 1):
     printTimer = Timer()
     printTimer.StartTimer()
     while True:
-        # Small print function to keep track of what state the elevator is in:
-        if printTimer.GetCurrentTime() > PrintRate:
-            printTimer.StartTimer()
-            if ClientUDP.connected:
-                print "___________________________________________"
-                print "Currently being served by: ", ClientUDP.ServerAddress
-            else:
-                print "___________________________________________"
-                print "Currently disconnected..."
         # Everything starts with polling on the Buttons:
         pressed = Buttons.ButtonPressed()
         # Basicaly a statemachine for the Client:
-        # Need some sort of thing for the client to tell that an order has been served.
         if pressed and ClientUDP.connected:
             RequestTimer.StartTimer()
             floor, button, externalorder = pressed
@@ -164,6 +156,20 @@ def ButtonThread(RefreshRate = 0.1, PrintRate = 1):
                 if not elevator.ExternalQueueDown[i]:
                     OrderObject.orderDown[i] = False
                     KillLight(i, ButtonType.CallDown)
+        # Kills the Network if the elevator has gone into errormode:
+        if elevator.currentstate == ElevatorState.Error:
+            Respawn.Popen(["gnome-terminal", "-x", "sh", "-c", "python Client.py"])
+            break
+
+        # Small print function to keep track of what state the elevator is in:
+        if printTimer.GetCurrentTime() > PrintRate:
+            printTimer.StartTimer()
+            if ClientUDP.connected:
+                print "___________________________________________"
+                print "Currently being served by: ", ClientUDP.ServerAddress
+            else:
+                print "___________________________________________"
+                print "Currently disconnected..."
 
 
 
@@ -180,8 +186,8 @@ def MainThread():
     Thread1.start()
     Thread2.start()
     Thread3.start()
-    # Keep the main Thread Alive:
-    while True:
+    # Keep the main thread alive until Thread1 is finished. This only happens if an error occurs.
+    while Thread1.isAlive():
         pass
 
 
