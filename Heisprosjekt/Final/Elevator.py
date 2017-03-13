@@ -60,12 +60,16 @@ class Elevator(object):
                     else:
                         if not self.timer.started and self.prevfloor == self.currentfloor:
                             self.timer.StartTimer()
+
                         if self.prevfloor != self.currentfloor:
+                            print "lol"
                             self.timer.StopTimer()
+
                         if self.timer.GetCurrentTime() > 10:
                             self.currentstate = ElevatorState.Error
                             self.elev.set_motordirection(MotorDirection.DirnStop)
                             self.direction = MotorDirection.DirnStop
+                            self.timer.StartTimer()
 
                 except AssertionError:
                     # When the elevator is between floors, a timer is started, if the elevator does not reach a new floor within 5 seconds its considered stuck:
@@ -145,8 +149,12 @@ class Elevator(object):
 
             elif self.currentstate == ElevatorState.Error:
                 while True:
+                    try:
+                        assert (self.currentfloor != -1)
+                        self.elev.set_door_open_lamp(1)
+                    except AssertionError:
+                        self.elev.set_door_open_lamp(0)
                     print("Elevator stuck, Call maintenance...")
-                    sleep(1)
             else:
                 self.currentstate = ElevatorState.Error
 
