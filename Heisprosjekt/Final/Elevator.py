@@ -32,6 +32,7 @@ class Elevator(object):
         self.elev.set_motordirection(MotorDirection.DirnStop)
         # Current floor
         self.currentfloor = self.elev.get_floor_sensor_signal()
+        self.prevfloor    = self.currentfloor
 
 
     def Serve(self, TimeOut = 5):
@@ -39,6 +40,7 @@ class Elevator(object):
             # This is basicaly a state Machine for the elevator:
             if self.currentstate == ElevatorState.Running:
                 # Using mutex to avoid Concurrency
+                self.prevfloor    = self.currentfloor
                 self.currentfloor = self.elev.get_floor_sensor_signal()
                 try:
                     assert(self.currentfloor != -1)
@@ -48,18 +50,23 @@ class Elevator(object):
                     #fix
 
                     if self.StopAtFloor():
+                        # Stop the timer:
+                        self.timer.StopTimer()
                         # If it is a order at that floor, stop the elevator:
                         self.elev.set_motordirection(MotorDirection.DirnStop)
                         # Update states
                         self.prevstate = self.currentstate
                         self.currentstate = ElevatorState.Idle
+                    else:
+                        if not self.timer.started and self.prevfloor == self.currentfloor:
+                            self.timer.StartTimer()
+                        if self.prevfloor != self.currentfloor:
+                            self.timer.StopTimer()
+                        if self.timer.GetCurrentTime() > 10:
+                            self.currentstate = ElevatorState.Error
+                            self.elev.set_motordirection(MotorDirection.DirnStop)
+                            self.direction = MotorDirection.DirnStop
 
-                    elif self.StopAtFloor():
-                        # If it is a order at that floor, stop the elevator:
-                        self.elev.set_motordirection(MotorDirection.DirnStop)
-                        # Update states
-                        self.prevstate = self.currentstate
-                        self.currentstate = ElevatorState.Idle
                 except AssertionError:
                     # When the elevator is between floors, a timer is started, if the elevator does not reach a new floor within 5 seconds its considered stuck:
                     if not self.timer.started:
@@ -69,6 +76,7 @@ class Elevator(object):
                         # elevator considers itself stuck and stops:
                         self.currentstate = ElevatorState.Error
                         self.elev.set_motordirection(MotorDirection.DirnStop)
+                        self.direction = MotorDirection.DirnStop
                     pass
 
             elif self.currentstate == ElevatorState.Idle:
