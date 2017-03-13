@@ -154,13 +154,16 @@ class Elevator(object):
                 pass
 
             elif self.currentstate == ElevatorState.Error:
+                # if the elevator is stuck at a floor, the door is kept open, if not it closes.
                 while True:
                     try:
                         assert (self.currentfloor != -1)
                         self.elev.set_door_open_lamp(1)
                     except AssertionError:
+                        print "lol"
                         self.elev.set_door_open_lamp(0)
                     print("Elevator stuck, Call maintenance...")
+
             else:
                 self.currentstate = ElevatorState.Error
 
