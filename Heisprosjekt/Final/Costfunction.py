@@ -8,7 +8,7 @@ def FastestElevator(Clientlist, Externalorder):
     Clientindex = -1
     Length = -1
     for i in range(len(Clientlist)):
-        temp = GetLength(Clientlist[i].orderUp, Clientlist[i].orderDown, Clientlist[i].internalOrders, Clientlist[i].direction, Externalorder, Clientlist[i].position)
+        temp = GetLength(Clientlist[i].orderUp, Clientlist[i].orderDown, Clientlist[i].internalOrders, Clientlist[i].direction, Externalorder, Clientlist[i].position, Clientlist[i].currentState)
         # Only considers Clients that is connected:
         if Length == -1 and Clientlist[i].connected and Clientlist[i].currentState != ElevatorState.Error:
             Length = temp
@@ -20,8 +20,8 @@ def FastestElevator(Clientlist, Externalorder):
 
 
 
-def GetLength(QueueUp, QueueDown, InternalQueue, Direction, Order, Currentposition):
-    if Direction == MotorDirection.DirnDown and Order[0] < Currentposition:
+def GetLength(QueueUp, QueueDown, InternalQueue, Direction, Order, Currentposition, State):
+    if (Direction == MotorDirection.DirnDown or Direction == MotorDirection.DirnStop or State == ElevatorState.Idle) and Order[0] < Currentposition:
         # Merge the internal and external queue to one Queue:
         NewQueueDown = MergeQueue(QueueDown, InternalQueue, len(QueueDown) - 1, MotorDirection.DirnDown)
         return LengthDownToTarget(Currentposition, NewQueueDown, Order[0])
@@ -38,10 +38,14 @@ def GetLength(QueueUp, QueueDown, InternalQueue, Direction, Order, Currentpositi
         NewQueueDown = MergeQueue(QueueDown, InternalQueue, len(QueueDown) - 1, MotorDirection.DirnDown)
         return LengthUpToTarget(Currentposition, NewQueueUp, 0, EndTarget=True) + LengthDownToTarget(len(QueueDown), NewQueueDown, Order[0])
 
-    elif Direction == MotorDirection.DirnUp  and Order[0] > Currentposition:
+    elif (Direction == MotorDirection.DirnUp or Direction == MotorDirection.DirnStop or State == ElevatorState.Idle) and Order[0] > Currentposition:
         # Merge the internal and external queue to one Queue:
         NewQueueUp = MergeQueue(QueueUp, InternalQueue, Currentposition, MotorDirection.DirnUp)
         return LengthUpToTarget(Currentposition, NewQueueUp, Order[0])
+    else:
+        # Some fuckUp must have happened....
+        return 1000000
+
 
 
 def MergeQueue(ExternalQueue, InternalQueue, From, Dir):
@@ -79,10 +83,10 @@ def LengthUpToTarget(Position, Queue, Target, EndTarget = False):
         iterations = i
         # Error handling in-case operator put in floors below 0
         try:
-            if i == Target and Queue[i] and EndTarget:
+            if i == Target and Queue[i] and EndTarget and IsOrdersAbove(Queue, Position):
                 orders += 2
                 return orders + iterations - 1
-            elif i == Target:
+            elif i == Target and not IsOrdersAbove(Queue, Position):
                 return orders + iterations - 1
             elif Queue[i]:
                 orders += 2
@@ -100,10 +104,10 @@ def LengthDownToTarget(Position, Queue, Target, EndTarget = False):
         iterations += 1
         # Adding som error handling in-case operator put in too big floor
         try:
-            if i == Target and Queue[i] and EndTarget:
+            if i == Target and Queue[i] and EndTarget and IsOrdersBelow(Queue, Position):
                 orders += 2
                 return orders + iterations -1
-            elif i == Target:
+            elif i == Target and not IsOrdersBelow(Queue, Position):
                 return orders + iterations -1
             elif Queue[i]:
                 orders += 2
@@ -112,3 +116,26 @@ def LengthDownToTarget(Position, Queue, Target, EndTarget = False):
             return orders + iterations
     return orders + iterations
 
+def IsOrdersAbove(Queue, Floor):
+    # Iterate over the floors above and check for orders:
+    for i in range(Floor+1, len(Queue)):
+        # Error handling in-case operator put in floors below 0
+        try:
+            # if there are any orders above pending in any queue
+            if Queue[i]:
+                return True
+        except IndexError:
+            pass
+    return False
+
+def IsOrdersBelow(Queue , Floor):
+    # Iterate over the Queue and check if there are orders below floor argument:
+    for i in range(Floor-1, -1, -1):
+        # Adding som error handling in-case operator put in too big floor
+        try:
+            # if there are any orders below pending in any queue
+            if Queue[i]:
+                return True
+        except IndexError:
+            pass
+    return False

@@ -41,10 +41,10 @@ class QueueMaster(object):
         # If a order has been executed:
         if Client.orderCompleted:
             self.OrderCompleted(Client.orderCompleted, index)
-        # If the client has a faulty state
+        # If the client has a faulty state:
         if Client.currentState == ElevatorState.Error:
             self.Reprioritize(index)
-        self.PrintClientlist(TimeOut=1)
+        self.PrintClientlist(RefreshRate = 0.5)
         # Update the ligthlist:
         self.clientlist[index].lightsUp = self.LightListUp
         self.clientlist[index].lightsDown = self.LightListDown
@@ -69,6 +69,7 @@ class QueueMaster(object):
         self.clientlist[index].lightsUp   = self.LightListUp
         self.clientlist[index].lightsDown = self.LightListDown
         # Returns possibly updated object:
+        print self.clientlist[index].address, index
         return self.clientlist[index]
 
 
@@ -257,15 +258,12 @@ class QueueMaster(object):
 
 
     # Print function for the clientlist:
-    def PrintClientlist(self, TimeOut=1):
-        if self.printTimer > TimeOut or not self.printTimer.started:
-            # Start the printing:
-            if not self.printTimer.started:
-                self.printTimer.StartTimer()
+    def PrintClientlist(self, RefreshRate=1):
+        if self.printTimer.GetCurrentTime() > RefreshRate:
             # Print every second:
             self.printTimer.StartTimer()
-            print "Client Address:".rjust(2), "Current Position:".rjust(4), "Current State:".rjust(6)
             print "_______________________________________________"
+            print "Client Address:".rjust(2), "Current Position:".rjust(4), "Current State:".rjust(6)
             for i in range(len(self.clientlist)):
                 if self.clientlist[i].currentState == ElevatorState.Running:
                     print self.clientlist[i].address.rjust(0), repr(self.clientlist[i].position + 1).rjust(8), "Running".rjust(14)
@@ -273,9 +271,10 @@ class QueueMaster(object):
                     print self.clientlist[i].address.rjust(0), repr(self.clientlist[i].position + 1).rjust(8), "Idle".rjust(14)
                 elif self.clientlist[i].currentState == ElevatorState.Error:
                     print self.clientlist[i].address.rjust(0), repr(self.clientlist[i].position + 1).rjust(8), "Error".rjust(14)
+        if not self.printTimer.started:
+            self.printTimer.StartTimer()
 
     def PrintOrder(self, Order):
-
         print "A Order Has Been Completed!"
         print "___________________________"
         print "At Floor:".rjust(2), "Direction:".rjust(5)
