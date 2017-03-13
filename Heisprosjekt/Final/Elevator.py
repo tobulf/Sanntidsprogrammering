@@ -14,8 +14,9 @@ class Elevator(object):
         self.elev = elev
         # Number of floors:
         self.floors = Floors
-        # Internal Timer:
-        self.timer = Timer()
+        # Internal Timers, one for floor timeout, and one for timeouts between floors:
+        self.floorTimer  = Timer()
+        self.runningTimer = Timer()
         # Elevator current state, and previous state:
         self.currentstate = ElevatorState.Idle
         self.prevstate = ElevatorState.Idle
@@ -45,13 +46,13 @@ class Elevator(object):
                 try:
                     assert(self.currentfloor != -1)
                     # If the elevator gets to a floor it will stop the timer:
-                    self.timer.StopTimer()
+                    self.runningTimer.StopTimer()
                     self.elev.set_floor_indicator(self.currentfloor)
                     #fix
 
                     if self.StopAtFloor():
                         # Stop the timer:
-                        self.timer.StopTimer()
+                        self.floorTimer.StopTimer()
                         # If it is a order at that floor, stop the elevator:
                         self.elev.set_motordirection(MotorDirection.DirnStop)
                         # Update states
@@ -59,29 +60,28 @@ class Elevator(object):
                         self.currentstate = ElevatorState.Idle
 
                     else:
-                        print self.timer.started
                         # handles if the elevator is stuck at a floor:
-                        if not self.timer.started and self.prevfloor == self.currentfloor:
-                            #print "yea bro"
-                            self.timer.StartTimer()
+                        if not self.floorTimer.started and self.prevfloor == self.currentfloor:
+                            print "yea bro"
+                            self.floorTimer.StartTimer()
 
                         elif self.prevfloor != self.currentfloor:
                             print "loll"
-                            self.timer.StopTimer()
+                            self.floorTimer.StopTimer()
 
-                        elif self.timer.GetCurrentTime() > 3:
+                        elif self.floorTimer.GetCurrentTime() > 3:
                             print "sick shit hoe"
                             self.currentstate = ElevatorState.Error
                             self.elev.set_motordirection(MotorDirection.DirnStop)
                             self.direction = MotorDirection.DirnStop
-                            self.timer.StartTimer()
+                            self.floorTimer.StopTimer()
 
                 except AssertionError:
                     # When the elevator is between floors, a timer is started, if the elevator does not reach a new floor within 5 seconds its considered stuck:
-                    if not self.timer.started:
-                        self.timer.StartTimer()
+                    if not self.runningTimer.started:
+                        self.runningTimer.StartTimer()
                     # If the elevator times out:
-                    elif self.timer.GetCurrentTime() > TimeOut:
+                    elif self.runningTimer.GetCurrentTime() > TimeOut:
                         # elevator considers itself stuck and stops:
                         self.currentstate = ElevatorState.Error
                         self.elev.set_motordirection(MotorDirection.DirnStop)
