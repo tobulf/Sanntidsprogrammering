@@ -65,7 +65,7 @@ class Elevator(object):
                             print "lol"
                             self.timer.StopTimer()
 
-                        if self.timer.GetCurrentTime() > 10:
+                        if self.timer.GetCurrentTime() > 3:
                             self.currentstate = ElevatorState.Error
                             self.elev.set_motordirection(MotorDirection.DirnStop)
                             self.direction = MotorDirection.DirnStop
