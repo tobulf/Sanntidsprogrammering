@@ -38,18 +38,15 @@ class QueueMaster(object):
             #print Client.orderCompleted
             if Client.orderCompleted:
                 self.OrderCompleted(Client.orderCompleted, index)
+            elif Client.currentState == ElevatorState.Error:
+                self.Reprioritize(index)
             # Update the ligthlist:
-            print dumps(self.LightListUp), dumps(self.LightListDown)
-            print dumps(self.clientlist[index].orderUp), dumps(self.clientlist[index].orderDown)
-
             self.clientlist[index].lightsUp = self.LightListUp
             self.clientlist[index].lightsDown = self.LightListDown
             return self.clientlist[index]
 
 
     def GotOrder(self, Client):
-        print len(self.clientlist)
-        print len(self.timerlist)
         # Tries to add client
         self.AddClient(Client)
         # Finds index:
@@ -73,7 +70,10 @@ class QueueMaster(object):
         # Adds the order to the Clients order List.
         print Order
         self.clientlist[priorityIndex].order = Order
-        if Order[1] == LampType.CallDown:
+        if priorityIndex == -1:
+            # If nothing can be prioritized it does nothing with the order. All elevators are either stuck or disconnected...
+            pass
+        elif Order[1] == LampType.CallDown:
             self.clientlist[priorityIndex].orderDown[Order[0]] = True
             self.LightListDown[Order[0]] = True
         elif Order[1] == LampType.CallUp:
@@ -145,6 +145,8 @@ class QueueMaster(object):
         self.clientlist[index].position = Client.position
         # Updates the direction:
         self.clientlist[index].direction = Client.direction
+        # Update the state of the Elevator:
+        self.clientlist[index].currentState = Client.currentState
         # Updates status:
         self.clientlist[index].connected = True
 
