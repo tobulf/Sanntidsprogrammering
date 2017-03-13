@@ -30,6 +30,7 @@ def ElevatorThread():
 def UDPThread():
     global Httpclient
     while True:
+        print ClientUDP.connected
         ClientUDP.Listen()
         # If the Client is disconnected and has no HttpConnection:
         if ClientUDP.connected and not Httpclient.connected:
