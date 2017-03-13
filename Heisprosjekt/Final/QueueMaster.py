@@ -35,11 +35,13 @@ class QueueMaster(object):
             index = self.GetClientIndex(Client.address)
             self.UpdateData(Client, index)
             # If a order has been executed:
-            #print Client.orderCompleted
             if Client.orderCompleted:
                 self.OrderCompleted(Client.orderCompleted, index)
-            elif Client.currentState == ElevatorState.Error:
+                self.PrintClientlist()
+            # If the client has a faulty state
+            if Client.currentState == ElevatorState.Error:
                 self.Reprioritize(index)
+                self.PrintClientlist()
             # Update the ligthlist:
             self.clientlist[index].lightsUp = self.LightListUp
             self.clientlist[index].lightsDown = self.LightListDown
@@ -56,7 +58,6 @@ class QueueMaster(object):
         # Pass on the order:
         self.PrioritizeOrder(Client.order)
         # Update the ligthlist:
-        print dumps(self.LightListUp), dumps(self.clientlist[index].orderUp)
         self.clientlist[index].lightsUp   = self.LightListUp
         self.clientlist[index].lightsDown = self.LightListDown
         # Returns possibly updated object:
@@ -68,7 +69,6 @@ class QueueMaster(object):
         # The index is used to update the external Queue of the right client.
         priorityIndex = FastestElevator(self.clientlist, Order)
         # Adds the order to the Clients order List.
-        print Order
         self.clientlist[priorityIndex].order = Order
         if priorityIndex == -1:
             # If nothing can be prioritized it does nothing with the order. All elevators are either stuck or disconnected...
@@ -92,8 +92,7 @@ class QueueMaster(object):
                 # Considers Client disconnected:
                 self.clientlist[i].connected = False
                 # Prints a message that an elevator has timed out:
-                for n in range(40):
-                    print "TIMEOUT!!"
+                print "TIMEOUT!!"
                 # Re prioritize external orders of given Client
                 self.Reprioritize(i)
 
@@ -118,15 +117,12 @@ class QueueMaster(object):
         # If the client is not in the clientlist, it will be added:
         index = self.GetClientIndex(Client.address)
         if index == -1:
-            for i in range(10):
-                print "New Client Added: ", Client.address
-
+            print "New Client Added: ", Client.address
             # Adds the new client to the client list:
             self.clientlist.append(Client)
             # Each client has its own timer:
             self.timerlist.append(Timer())
             return True
-
         return False
 
     def GetClientIndex(self, Clientaddress):
@@ -161,11 +157,9 @@ class QueueMaster(object):
 
     def OrderCompleted(self, Order, Index):
         # Update the correct Ligthtlist and the Queue:
-        for i in range(40):
-            print "A ORDER IS COMPLETED!"
+        self.PrintOrder(Order)
         # Delete the order for the Client
         self.clientlist[Index].order = None
-
         if Order[1] == MotorDirection.DirnDown:
             self.LightListDown[Order[0]] = False
             self.clientlist[Index].orderDown[Order[0]] = False
@@ -248,19 +242,29 @@ class QueueMaster(object):
                     self.timerlist.append(Timer())
                 # Starts all timers
                 self.timerlist[i].StartTimer()
-            print len(self.timerlist), len(self.clientlist)
         except TypeError:
             pass
 
 
 
 
+    # Print function for the clientlist:
+    def PrintClientlist(self):
+        print repr("Client Adress:").rjust(2), repr("Current Position:").rjust(4), repr("Current state:").rjust(6)
+        for i in range(self.clientlist):
+            print repr(self.clientlist[i].address).rjust(2), repr(self.clientlist[i].position).rjust(4), repr(self.clientlist[i].currentState).rjust(6)
 
 
-
-
-
-
+    def PrintOrder(self, Order):
+        print "A has been completed! "
+        print "_____________________"
+        print "At Floor:".rjust(2), "Direction:".rjust(5)
+        print "---------------------"
+        if Order[1] == MotorDirection.DirnDown:
+            print repr(Order[0] + 1).rjust(8), "Up".rjust(10)
+        elif Order[1] == MotorDirection.DirnUp:
+            print repr(Order[0]+1).rjust(8), "Up".rjust(10)
+        print "---------------------"
 
 
 

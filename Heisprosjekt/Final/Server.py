@@ -63,6 +63,9 @@ class RequestHandler(BaseHTTPRequestHandler):
         # Only dormant server post Get:
         answer = Queuemaster.toJson()
         self.send_response(200, answer)
+    # Handle the logs
+    def log_message(self, format, *args):
+        return
 
 Handler = RequestHandler
 server  = HttpServer(IP, Port, Handler)
@@ -102,6 +105,7 @@ def UDPThread():
         else:
             heartbeat.Listen()
             if heartbeat.ServingServer:
+                print "Now Serving!"
                 backupclient.connected = False
 
             elif not backupclient.connected and not heartbeat.ServingServer:

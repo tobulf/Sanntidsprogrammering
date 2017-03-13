@@ -44,7 +44,7 @@ class UdpClient(object):
             pass
 
 
-    def Listen(self):
+    def Listen(self, TimeOut=0.01):
         try:
             data = self.client.recv(1024)
             # if there is nothing in the buffer it throws an exception an passes.
@@ -52,7 +52,7 @@ class UdpClient(object):
             if not message[0] == "im alive":
                 if not self.timer.started:
                     self.timer.StartTimer()
-                elif self.timer.GetCurrentTime() > 1:
+                elif self.timer.GetCurrentTime() > TimeOut:
                     self.ServingServer = True
                     self.timer.StopTimer()
 
@@ -65,7 +65,7 @@ class UdpClient(object):
             if not self.timer.started:
                     #starts the internal timer
                     self.timer.StartTimer()
-            elif self.timer.GetCurrentTime() > 1:
+            elif self.timer.GetCurrentTime() > TimeOut:
                 #if It has gone more than Three seconds it considers itself as the serving server
                 self.ServingServer = True
                 # stop timer:
