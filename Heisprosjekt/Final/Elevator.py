@@ -61,12 +61,15 @@ class Elevator(object):
                     else:
                         # handles if the elevator is stuck at a floor:
                         if not self.timer.started and self.prevfloor == self.currentfloor:
+                            print "yea bro"
                             self.timer.StartTimer()
 
                         elif self.prevfloor != self.currentfloor:
+                            print "loll"
                             self.timer.StopTimer()
 
                         elif self.timer.GetCurrentTime() > 3:
+                            print "sick shit hoe"
                             self.currentstate = ElevatorState.Error
                             self.elev.set_motordirection(MotorDirection.DirnStop)
                             self.direction = MotorDirection.DirnStop
