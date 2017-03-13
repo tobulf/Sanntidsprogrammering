@@ -20,7 +20,7 @@ class UdpServer(object):
         self.ServerAddress = ""
 
 
-    def Listen(self, TimeOut=0.3):
+    def Listen(self, TimeOut=0.4):
         # function to listen on UDP for the client
         if self.connected:  # if it is connected, it checks the UDP message for "im alive" phrase.
             # try to check buffer and load json

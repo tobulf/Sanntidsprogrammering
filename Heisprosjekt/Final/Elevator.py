@@ -31,12 +31,12 @@ class Elevator(object):
         self.ExternalQueueDown = [False]*Floors # queue from external orders, determined by server
         self.ExternalQueueUp = [False] * Floors # queue from external orders, determined by server
         # Initialise the elevator, Makes it go to 1st floor:
-        self.elev.set_motordirection(MotorDirection.DirnDown)
-        while self.elev.get_floor_sensor_signal() == -1:
+        self.elev.SetMotordirection(MotorDirection.DirnDown)
+        while self.elev.GetFloorSensorSignal() == -1:
             pass
-        self.elev.set_motordirection(MotorDirection.DirnStop)
+        self.elev.SetMotordirection(MotorDirection.DirnStop)
         # Current floor
-        self.currentfloor = self.elev.get_floor_sensor_signal()
+        self.currentfloor = self.elev.GetFloorSensorSignal()
         self.prevfloor    = self.currentfloor
 
 
@@ -46,19 +46,19 @@ class Elevator(object):
             if self.currentstate == ElevatorState.Running:
                 # Using mutex to avoid Concurrency
                 self.prevfloor    = self.currentfloor
-                self.currentfloor = self.elev.get_floor_sensor_signal()
+                self.currentfloor = self.elev.GetFloorSensorSignal()
                 try:
                     assert(self.currentfloor != -1)
                     # If the elevator gets to a floor it will stop the timer:
                     self.runningTimer.StopTimer()
-                    self.elev.set_floor_indicator(self.currentfloor)
+                    self.elev.SetFloorIndicator(self.currentfloor)
                     #fix
 
                     if self.StopAtFloor():
                         # Stop the timer:
                         self.floorTimer.StopTimer()
                         # If it is a order at that floor, stop the elevator:
-                        self.elev.set_motordirection(MotorDirection.DirnStop)
+                        self.elev.SetMotordirection(MotorDirection.DirnStop)
                         # Update states
                         self.prevstate = self.currentstate
                         self.currentstate = ElevatorState.Idle
@@ -73,7 +73,7 @@ class Elevator(object):
 
                         elif self.floorTimer.GetCurrentTime() > 5:
                             self.currentstate = ElevatorState.Error
-                            self.elev.set_motordirection(MotorDirection.DirnStop)
+                            self.elev.SetMotordirection(MotorDirection.DirnStop)
                             self.direction = MotorDirection.DirnStop
                             self.floorTimer.StopTimer()
 
@@ -85,21 +85,21 @@ class Elevator(object):
                     elif self.runningTimer.GetCurrentTime() > TimeOut:
                         # elevator considers itself stuck and stops:
                         self.currentstate = ElevatorState.Error
-                        self.elev.set_motordirection(MotorDirection.DirnStop)
+                        self.elev.SetMotordirection(MotorDirection.DirnStop)
                         self.direction = MotorDirection.DirnStop
                     pass
 
             elif self.currentstate == ElevatorState.Idle:
                 # Checks the previous state
                 if self.prevstate == ElevatorState.Running:
-                    # If it was running, then it stopped due to an order at the current flor. Opens door.
-                    self.OpenDoor()
-                    # Turns of all the lights at the floor it arrived at:
+                    # Turns of the internal command-lights at the floor it arrived at:
                     KillLight(self.currentfloor, LampType.Command)
+                    # If it was running, then it stopped due to an order at the current floor. Opens door.
+                    self.OpenDoor()
                     # Deletes the order from the Queue, assumes everyone enters/exits the elevator when the door open:
-                    self.InternalQueue[self.currentfloor] = False
                     # mutex to prevent concurrency
                     mutex.acquire()
+                    self.InternalQueue[self.currentfloor] = False
                     self.ExternalQueueDown[self.currentfloor] = False
                     self.ExternalQueueUp[self.currentfloor] = False
                     mutex.release()
@@ -107,13 +107,13 @@ class Elevator(object):
 
                     # If there are orders above and the elevator was running it continues in that direction.
                     if self.IsOrdersAbove(self.currentfloor) and self.direction == MotorDirection.DirnUp:
-                        self.elev.set_motordirection(MotorDirection.DirnUp)
+                        self.elev.SetMotordirection(MotorDirection.DirnUp)
                         self.currentstate = ElevatorState.Running
                         self.prevstate = ElevatorState.Idle
 
                     # If there are orders below and the elevator was running it continues in that direction.
                     elif self.IsOrdersBelow(self.currentfloor) and self.direction == MotorDirection.DirnDown:
-                        self.elev.set_motordirection(MotorDirection.DirnDown)
+                        self.elev.SetMotordirection(MotorDirection.DirnDown)
                         self.currentstate = ElevatorState.Running
                         self.prevstate = ElevatorState.Idle
 
@@ -129,21 +129,23 @@ class Elevator(object):
                         # Kill all lights on the floor:
                         KillLight(self.currentfloor, LampType.Command)
                         # Using mutex to avoid Concurrency
+                        mutex.acquire()
                         # delete orders from Queues
                         self.ExternalQueueDown[self.currentfloor] = False
                         self.ExternalQueueUp[self.currentfloor] = False
                         self.InternalQueue[self.currentfloor] = False
+                        mutex.release()
                         # Open the door
                         self.OpenDoor()
                     # Checks if there are orders below the elevator and starts serving these if any.
                     elif self.IsOrdersAbove(self.currentfloor):
-                        self.elev.set_motordirection(MotorDirection.DirnUp)
+                        self.elev.SetMotordirection(MotorDirection.DirnUp)
                         # Using mutex to avoid Concurrency
                         self.direction = MotorDirection.DirnUp
                         self.currentstate = ElevatorState.Running
                     # Checks if there are orders above the elevator and starts serving these if any.
                     elif self.IsOrdersBelow(self.currentfloor):
-                        self.elev.set_motordirection(MotorDirection.DirnDown)
+                        self.elev.SetMotordirection(MotorDirection.DirnDown)
                         # Using mutex to avoid Concurrency
                         self.direction = MotorDirection.DirnDown
                         self.currentstate = ElevatorState.Running
@@ -157,10 +159,10 @@ class Elevator(object):
                 # if the elevator is stuck at a floor, the door is kept open, if not it closes.
                 while True:
                     try:
-                        assert (self.elev.get_floor_sensor_signal() != -1)
-                        self.elev.set_door_open_lamp(1)
+                        assert (self.elev.GetFloorSensorSignal() != -1)
+                        self.elev.SetDoorOpenLamp(1)
                     except AssertionError:
-                        self.elev.set_door_open_lamp(0)
+                        self.elev.SetDoorOpenLamp(0)
                     print("Elevator stuck, Call maintenance...")
 
             else:
@@ -170,18 +172,20 @@ class Elevator(object):
     def OpenDoor(self):
         # Check that the elevator is not between floors:
         try:
-            assert (self.elev.get_floor_sensor_signal() != -1)
+            assert (self.elev.GetFloorSensorSignal() != -1)
             # Open the door:
-            self.elev.set_door_open_lamp(1)
+            self.elev.SetDoorOpenLamp(1)
             # Standard hold time 3 seconds:
             sleep(3)
             # If Passenger holds the Command button, the elevator waits for a maximum of 10 more seconds:
             self.timer.StartTimer()
-            while self.timer.GetCurrentTime() < 10 and self.elev.get_buttonsignal(LampType.Command, self.elev.get_floor_sensor_signal()):
+            while self.timer.GetCurrentTime() < 10 and self.elev.GetButtonsignal(LampType.Command, self.elev.GetFloorSensorSignal()):
                 pass
             self.timer.StopTimer()
+            # Ensure that the light is turned of:
+            KillLight(self.currentfloor, LampType.Command)
             # Close the door:
-            self.elev.set_door_open_lamp(0)
+            self.elev.SetDoorOpenLamp(0)
         # If the elevator is between floors it does nothing:
         except AssertionError:
             pass

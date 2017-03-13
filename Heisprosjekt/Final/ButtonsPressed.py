@@ -21,7 +21,7 @@ class ButtonObject(object):
     def ButtonsPressed(self):
         for i in range(4):
             for n in range(3):
-                if elev.get_buttonsignal(n,i):
+                if elev.GetButtonsignal(n, i):
                     if n == 0 or n == 1:
                         return (i, n, True)
                     else:
@@ -33,7 +33,7 @@ class ButtonObject(object):
 def ButtonsPressedd():
     for i in range(4):
         for n in range(3):
-            if elev.get_buttonsignal(n,i):
+            if elev.GetButtonsignal(n, i):
                 if n == 0 or n == 1:
                     return (i, n, True)
                 else:

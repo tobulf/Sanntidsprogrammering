@@ -31,20 +31,24 @@ class QueueMaster(object):
     def GetUpdate(self, Client):
         # Tries to add the client in case its a new client, also returns just the Client, since it is new:
         self.AddClient(Client)
-        # If the Client is in the list, it returns the latest Client object
+        # Find The index in clientlist:
         index = self.GetClientIndex(Client.address)
+        # Update the data for the client:
+        self.UpdateData(Client, index)
         if not self.clientlist[index].connected:
-            # If the client was disconnected, the server takes over the external orders:
+            # If the client was disconnected, the server takes over the all the external orders:
             self.clientlist[index].orderUp = Client.orderUp
             self.clientlist[index].orderDown = Client.orderDown
-            self.UpdateData(Client, index)
+            self.Reprioritize(index)
         # If a order has been executed:
         if Client.orderCompleted:
             self.OrderCompleted(Client.orderCompleted, index)
         # If the client has a faulty state:
         if Client.currentState == ElevatorState.Error:
             self.Reprioritize(index)
-        #self.PrintClientlist(RefreshRate=1)
+        self.PrintClientlist(RefreshRate=1)
+        # Reprioritize after newest state and info:
+        #self.Reprioritize(index)
         # Update the ligthlist:
         self.clientlist[index].lightsUp = self.LightListUp
         self.clientlist[index].lightsDown = self.LightListDown
@@ -111,7 +115,7 @@ class QueueMaster(object):
     # when a timeout occurs it reprioritizes the Orders of the client that timed out
     def Reprioritize(self, Index):
         #Checks all floors for orders:
-        for i in range(self.floors-1):
+        for i in range(self.floors):
             # Reprioritize Both orders UP and DOWN:
             if self.clientlist[Index].orderUp[i]:
                 order = [i, LampType.CallUp]
@@ -172,6 +176,7 @@ class QueueMaster(object):
         if Order[1] == MotorDirection.DirnDown:
             self.LightListDown[Order[0]] = False
             self.clientlist[Index].orderDown[Order[0]] = False
+            # Stop the clients timer:
             self.timerlist[Index].StopTimer()
             if Order[0] == 0:
                 # If the elevator is in the end, it should delete the oposite order.
@@ -185,16 +190,16 @@ class QueueMaster(object):
         elif Order[1] == MotorDirection.DirnUp:
             self.LightListUp[Order[0]] = False
             self.clientlist[Index].orderUp[Order[0]] = False
+            # Stop the clients timer:
+            self.timerlist[Index].StopTimer()
             #If the elevator is in the end, it should delete the oposite order.
             if Order[0] == self.floors-1:
                 self.LightListDown[Order[0]] = False
                 self.clientlist[Index].orderDown[Order[0]] = False
             # Check for more externalOrders:
-            self.timerlist[Index].StopTimer()
             if self.GotExternalOrders(self.clientlist[Index]):
                 # Start timer
                 self.timerlist[Index].StartTimer()
-
 
         elif Order[1] == MotorDirection.DirnStop:
             self.LightListUp[Order[0]] = False
@@ -263,14 +268,15 @@ class QueueMaster(object):
             # Print every second:
             self.printTimer.StartTimer()
             print "_______________________________________________"
+            print "-------------Currently Serving:----------------"
             print "Client Address:".rjust(2), "Current Position:".rjust(4), "Current State:".rjust(6)
             for i in range(len(self.clientlist)):
                 if self.clientlist[i].currentState == ElevatorState.Running:
-                    print self.clientlist[i].address.rjust(0), repr(self.clientlist[i].position + 1).rjust(8), "Running".rjust(14)
+                    print self.clientlist[i].address.rjust(0), repr(self.clientlist[i].position + 1).rjust(8), "Running".rjust(16)
                 elif self.clientlist[i].currentState == ElevatorState.Idle:
-                    print self.clientlist[i].address.rjust(0), repr(self.clientlist[i].position + 1).rjust(8), "Idle".rjust(14)
+                    print self.clientlist[i].address.rjust(0), repr(self.clientlist[i].position + 1).rjust(8), "Idle".rjust(16)
                 elif self.clientlist[i].currentState == ElevatorState.Error:
-                    print self.clientlist[i].address.rjust(0), repr(self.clientlist[i].position + 1).rjust(8), "Error".rjust(14)
+                    print self.clientlist[i].address.rjust(0), repr(self.clientlist[i].position + 1).rjust(8), "Error".rjust(16)
         if not self.printTimer.started:
             self.printTimer.StartTimer()
 

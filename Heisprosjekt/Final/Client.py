@@ -2,7 +2,7 @@ from threading import Lock, Thread
 from LightCtrl import *
 from TypeClasses import *
 from ButtonsPressed import *
-from sys import exit
+import sys
 import subprocess as Respawn
 from Order import Order
 from ClientObject import Client
