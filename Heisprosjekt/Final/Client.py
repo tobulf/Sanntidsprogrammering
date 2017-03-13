@@ -63,81 +63,86 @@ def ButtonThread(RefreshRate = 0.3):
                 if ClientObject:
                     # Add Potential order:
                     OrderObject.AppendOrder(ClientObject.order, ClientObject)
-                    # Update external queues
+                    # Update external queues:
                     mutex.acquire()
                     elevator.ExternalQueueUp   = OrderObject.orderUp
                     elevator.ExternalQueueDown = OrderObject.orderDown
                     mutex.release()
+                    # Set all the ligths:
                     for i in range(elevator.floors):
                         if ClientObject.lightsDown[i]:
-                            SetLigth(i, LampType.ButtonCallDown)
+                            SetLigth(i, LampType.CallDown)
                         if ClientObject.lightsUp[i]:
-                            SetLigth(i, LampType.ButtonCallUp)
+                            SetLigth(i, LampType.CallUp)
                         if not ClientObject.lightsDown[i]:
-                            KillLight(i, LampType.ButtonCallDown)
+                            KillLight(i, LampType.CallDown)
                         if not ClientObject.lightsUp[i]:
-                            KillLight(i, LampType.ButtonCallUp)
+                            KillLight(i, LampType.CallUp)
+                elif not ClientObject:
+                    # If the Client has issues submitting the order to the server it just takes the order itself:
+                    if button == ButtonType.CallDown:
+                        elevator.ExternalQueueDown[floor] = True
+                        SetLigth(floor, ButtonType.CallDown)
+                    if button == ButtonType.CallUp:
+                        elevator.ExternalQueueUp[floor] = True
+                        SetLigth(floor, ButtonType.CallUp)
             else:
                 # if not an externalOrder, just add the order to internal queue:
                 mutex.acquire()
                 elevator.InternalQueue[floor] = True
                 mutex.release()
                 # Set the lights:
-                SetLigth(floor, LampType.ButtonCommand)
+                SetLigth(floor, LampType.Command)
 
         elif not pressed and ClientUDP.connected and RequestTimer.GetCurrentTime() > RefreshRate:
-            # Reset the Requesttimer:
+            # Reset the Request-timer:
             RequestTimer.StartTimer()
-            orderc = OrderObject.ExternalOrderServed(elevator.currentfloor, elevator.direction, elevator.currentstate)
-            print orderc
-            print OrderObject.orderUp, OrderObject.orderDown, elevator.currentfloor, elevator.direction, elevator.currentstate
-            ClientObject = Client(Address=Address, Direction = elevator.direction, Position = elevator.currentfloor, InternalOrders = elevator.InternalQueue, OrderCompleted = orderc)
+            # Check if any orders ar served
+            OrderCompleted = OrderObject.ExternalOrderServed(elevator.currentfloor, elevator.direction, elevator.currentstate)
+            ClientObject = Client(Address=Address, Direction = elevator.direction, Position = elevator.currentfloor, InternalOrders = elevator.InternalQueue, OrderCompleted = OrderCompleted)
             ClientObject = Httpclient.PostRequest("GetUpdate", ClientObject.toJson())
             if ClientObject:
-                print ClientObject.order
+                # Add an potential order to the orderlist:
                 OrderObject.AppendOrder(ClientObject.order, ClientObject)
+                # Update external queues:
                 mutex.acquire()
                 elevator.ExternalQueueUp = OrderObject.orderUp
                 elevator.ExternalQueueDown = OrderObject.orderDown
                 mutex.release()
                 # Reset the lights for the external orders:
-                #print ClientObject.lightsDown, ClientObject.lightsUp
                 for i in range(elevator.floors):
                     if ClientObject.lightsDown[i]:
-                        SetLigth(i, LampType.ButtonCallDown)
+                        SetLigth(i, LampType.CallDown)
                     if ClientObject.lightsUp[i]:
-                        SetLigth(i, LampType.ButtonCallUp)
+                        SetLigth(i, LampType.CallUp)
                     if not ClientObject.lightsDown[i]:
-                        KillLight(i, LampType.ButtonCallDown)
+                        KillLight(i, LampType.CallDown)
                     if not ClientObject.lightsUp[i]:
-                        KillLight(i, LampType.ButtonCallUp)
+                        KillLight(i, LampType.CallUp)
 
         # If the Client is not connected to a server, it works as a ordinary elevator:
         elif pressed and not ClientUDP.connected:
             floor, button, externalorder = pressed
+            # Mutex to prevent fuckups:
             mutex.acquire()
-            if button == Button_type.BUTTON_CALL_DOWN:
+            if button == ButtonType.CallDown:
                 elevator.ExternalQueueDown[floor] = True
-                SetLigth(floor, Button_type.BUTTON_CALL_DOWN)
-            if button == Button_type.BUTTON_CALL_UP:
+                SetLigth(floor, ButtonType.CallDown)
+            if button == ButtonType.CallUp:
                 elevator.ExternalQueueUp[floor] = True
-                SetLigth(floor, Button_type.BUTTON_CALL_UP)
-            if button == Button_type.BUTTON_COMMAND:
+                SetLigth(floor, ButtonType.CallUp)
+            if button == ButtonType.Command:
                 elevator.InternalQueue[floor] = True
-                SetLigth(floor, Button_type.BUTTON_COMMAND)
+                SetLigth(floor, ButtonType.Command)
             mutex.release()
             
         elif not ClientUDP.connected:
             # Turn of all lights that are not in the orderList:
             for i in range(elevator.floors):
                 if not elevator.ExternalQueueUp[i]:
-                    KillLight(i, Button_type.BUTTON_CALL_UP)
+                    KillLight(i, ButtonType.CallUp)
                 if not elevator.ExternalQueueDown[i]:
-                    KillLight(i, Button_type.BUTTON_CALL_DOWN)
-
-
-
-
+                    KillLight(i, ButtonType.CallDown)
 
 
 

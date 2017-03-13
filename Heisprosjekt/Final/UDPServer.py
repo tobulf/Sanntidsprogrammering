@@ -5,7 +5,7 @@ from Timer import Timer
 class UdpServer(object):
     def __init__(self,Port): # constructor, makes an socket named server.
         # Set up a UDP server:
-        self.Address = ('',Port) # server own IP and PORT
+        self.Address = ('', Port) # server own IP and PORT
         # Internal timer:
         self.timer = Timer()
         # Making a socketserver:

@@ -2,8 +2,7 @@ import socket
 from ClientObject import Client
 from QueueMaster import QueueMaster
 from httplib import *
-from json import dumps, loads
-from time import sleep
+
 
 
 
@@ -32,10 +31,10 @@ class HttpClient(object):
                     Clientobject.fromJson(response.reason)
                     return Clientobject
                 else:
-                    return None
+                    False
             except (socket.error, TypeError, BadStatusLine):
                 self.connected = False
-                return None
+                return False
             
             
             
