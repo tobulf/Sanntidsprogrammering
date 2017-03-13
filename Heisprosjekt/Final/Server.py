@@ -90,7 +90,8 @@ def HTTPThread(RefreshRate = 0.1):
                 backup = backupclient.GetRequest()
                 if backup:
                     # If backup, replace old:
-                    Queuemaster = backupclient.GetRequest()
+                    print
+                    Queuemaster = backup
 
 
 def UDPThread():

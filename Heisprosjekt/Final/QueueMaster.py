@@ -223,7 +223,7 @@ class QueueMaster(object):
         temp = tempObj.__dict__
         # Serialize every list and info, not the Timer list which is not serializable
         try:
-            return dumps({'clientlist':temp['clientlist'], 'LightListUp':temp['LightListUp'], 'LightListDown':temp['LightListDown']})
+            return dumps({'clientlist': temp['clientlist'], 'LightListUp': temp['LightListUp'], 'LightListDown': temp['LightListDown']})
         except TypeError:
             # If some issue occurs it just returns nothing.
             return dumps(None)

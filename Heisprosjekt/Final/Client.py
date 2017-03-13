@@ -58,7 +58,8 @@ def ButtonThread(RefreshRate = 0.1):
             RequestTimer.StartTimer()
             floor, button, externalorder = pressed
             if externalorder:
-                ClientObject = Client(Address=Address, Order=[floor, button], Direction=elevator.direction, Position = elevator.currentfloor, InternalOrders = elevator.InternalQueue, OrderCompleted = OrderObject.ExternalOrderServed(elevator.currentfloor, elevator.direction, elevator.currentstate))
+                # Declare a ClientObject which contain all necessary information to the server:
+                ClientObject = Client(Address=Address, Order=[floor, button], Direction=elevator.direction, Position=elevator.currentfloor, InternalOrders=elevator.InternalQueue, OrderCompleted=OrderObject.ExternalOrderServed(elevator.currentfloor, elevator.direction, elevator.currentstate), CurrentState=elevator.currentstate)
                 # Using mutex before making a request, to prevent concurrency if the order never gets trough:
                 ClientObject = Httpclient.PostRequest("GotOrder", ClientObject.toJson())
                 if ClientObject:
@@ -100,7 +101,8 @@ def ButtonThread(RefreshRate = 0.1):
             RequestTimer.StartTimer()
             # Check if any orders ar served
             OrderCompleted = OrderObject.ExternalOrderServed(elevator.currentfloor, elevator.direction, elevator.currentstate)
-            ClientObject = Client(Address=Address, Direction = elevator.direction, Position = elevator.currentfloor, InternalOrders = elevator.InternalQueue, OrderCompleted = OrderCompleted)
+            # Declare a ClientObject which contain all necessary information to the server:
+            ClientObject = Client(Address=Address, Direction = elevator.direction, Position=elevator.currentfloor, InternalOrders=elevator.InternalQueue, OrderCompleted=OrderCompleted, CurrentState=elevator.currentstate)
             ClientObject = Httpclient.PostRequest("GetUpdate", ClientObject.toJson())
             if ClientObject:
                 # Add an potential order to the orderlist:
@@ -124,7 +126,7 @@ def ButtonThread(RefreshRate = 0.1):
         # If the Client is not connected to a server, it works as a ordinary elevator:
         elif pressed and not ClientUDP.connected:
             floor, button, externalorder = pressed
-            # Mutex to prevent fuckups:
+            # Mutex to prevent concurrency:
             mutex.acquire()
             if button == ButtonType.CallDown:
                 elevator.ExternalQueueDown[floor] = True
