@@ -20,7 +20,7 @@ class UdpServer(object):
         self.ServerAddress = ""
 
 
-    def Listen(self):
+    def Listen(self, TimeOut=0.1):
         # function to listen on UDP for the client
         if self.connected:  # if it is connected, it checks the UDP message for "im alive" phrase.
             # try to check buffer and load json
@@ -32,7 +32,7 @@ class UdpServer(object):
                     if not self.timer.started:
                         # start the timer
                         self.timer.StartTimer()
-                    elif self.timer.GetCurrentTime() > 3:
+                    elif self.timer.GetCurrentTime() > TimeOut:
                         # If DC for 3 seconds:
                         self.connected = False
 
@@ -40,7 +40,7 @@ class UdpServer(object):
             except (socket.error, TypeError, ValueError):
                 if not self.timer.started:
                     self.timer.StartTimer()
-                elif self.timer.started and self.timer.GetCurrentTime() > 3:
+                elif self.timer.started and self.timer.GetCurrentTime() > TimeOut:
                     self.timer.StopTimer()
                     self.connected = False
                 pass
@@ -59,7 +59,7 @@ class UdpServer(object):
             except (socket.error, TypeError, ValueError):
                 if not self.timer.started:
                     self.timer.StartTimer()
-                elif self.timer.GetCurrentTime() > 3:
+                elif self.timer.GetCurrentTime() > TimeOut:
                     self.timer.StopTimer()
                     self.connected = False
 

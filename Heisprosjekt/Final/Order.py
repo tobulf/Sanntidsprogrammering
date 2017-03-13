@@ -53,7 +53,8 @@ class Order(object):
         elif Direction == MotorDirection.DirnDown:
             self.orderDown[Floor] = False
 
-    def AppendOrder(self, Order, ClientObject):
+    def AppendOrder(self, ClientObject):
         # Assert that there is an order to add:
         self.orderDown = ClientObject.orderDown
         self.orderUp = ClientObject.orderUp
+

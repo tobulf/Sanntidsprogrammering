@@ -51,6 +51,7 @@ class Client(object):
             self.position       = self.dict["position"]
             self.lightsUp       = self.dict["lightsUp"]
             self.lightsDown     = self.dict["lightsDown"]
+            self.currentState = self.dict["currentState"]
         except (TypeError, ValueError):
             pass
 

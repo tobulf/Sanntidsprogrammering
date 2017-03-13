@@ -59,12 +59,12 @@ def ButtonThread(RefreshRate = 0.1):
             floor, button, externalorder = pressed
             if externalorder:
                 # Declare a ClientObject which contain all necessary information to the server:
-                ClientObject = Client(Address=Address, Order=[floor, button], Direction=elevator.direction, Position=elevator.currentfloor, InternalOrders=elevator.InternalQueue, OrderCompleted=OrderObject.ExternalOrderServed(elevator.currentfloor, elevator.direction, elevator.currentstate), CurrentState=elevator.currentstate)
+                ClientObject = Client(Address=Address, Order=[floor, button], Direction=elevator.direction, Position=elevator.currentfloor, InternalOrders=elevator.InternalQueue, OrderCompleted=OrderObject.ExternalOrderServed(elevator.currentfloor, elevator.direction, elevator.currentstate), CurrentState=elevator.currentstate, OrderUp=OrderObject.orderUp, OrderDown=OrderObject.orderDown)
                 # Using mutex before making a request, to prevent concurrency if the order never gets trough:
                 ClientObject = Httpclient.PostRequest("GotOrder", ClientObject.toJson())
                 if ClientObject:
                     # Add Potential order:
-                    OrderObject.AppendOrder(ClientObject.order, ClientObject)
+                    OrderObject.AppendOrder(ClientObject)
                     # Update external queues:
                     mutex.acquire()
                     elevator.ExternalQueueUp   = OrderObject.orderUp
@@ -102,11 +102,11 @@ def ButtonThread(RefreshRate = 0.1):
             # Check if any orders ar served
             OrderCompleted = OrderObject.ExternalOrderServed(elevator.currentfloor, elevator.direction, elevator.currentstate)
             # Declare a ClientObject which contain all necessary information to the server:
-            ClientObject = Client(Address=Address, Direction = elevator.direction, Position=elevator.currentfloor, InternalOrders=elevator.InternalQueue, OrderCompleted=OrderCompleted, CurrentState=elevator.currentstate)
+            ClientObject = Client(Address=Address, Direction = elevator.direction, Position=elevator.currentfloor, InternalOrders=elevator.InternalQueue, OrderCompleted=OrderCompleted, CurrentState=elevator.currentstate, OrderUp=OrderObject.orderUp, OrderDown=OrderObject.orderDown)
             ClientObject = Httpclient.PostRequest("GetUpdate", ClientObject.toJson())
             if ClientObject:
                 # Add an potential order to the orderlist:
-                OrderObject.AppendOrder(ClientObject.order, ClientObject)
+                OrderObject.AppendOrder(ClientObject)
                 # Update external queues:
                 mutex.acquire()
                 elevator.ExternalQueueUp = OrderObject.orderUp
@@ -130,9 +130,11 @@ def ButtonThread(RefreshRate = 0.1):
             mutex.acquire()
             if button == ButtonType.CallDown:
                 elevator.ExternalQueueDown[floor] = True
+                OrderObject.orderDown = elevator.ExternalQueueDown
                 SetLigth(floor, ButtonType.CallDown)
             if button == ButtonType.CallUp:
                 elevator.ExternalQueueUp[floor] = True
+                OrderObject.orderUp = elevator.ExternalQueueUp
                 SetLigth(floor, ButtonType.CallUp)
             if button == ButtonType.Command:
                 elevator.InternalQueue[floor] = True
@@ -144,8 +146,10 @@ def ButtonThread(RefreshRate = 0.1):
             # Turn of all lights that are not in the orderList:
             for i in range(elevator.floors):
                 if not elevator.ExternalQueueUp[i]:
+                    OrderObject.orderUp[i] = False
                     KillLight(i, ButtonType.CallUp)
                 if not elevator.ExternalQueueDown[i]:
+                    OrderObject.orderDown[i] = False
                     KillLight(i, ButtonType.CallDown)
 
 
