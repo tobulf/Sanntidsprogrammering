@@ -109,6 +109,7 @@ def ButtonThread(RefreshRate = 0.1, PrintRate = 1):
             # Declare a ClientObject which contain all necessary information to the server:
             ClientObject = Client(Address=Address, Direction = elevator.direction, Position=elevator.currentfloor, InternalOrders=elevator.InternalQueue, OrderCompleted=OrderCompleted, CurrentState=elevator.currentstate, OrderUp=OrderObject.orderUp, OrderDown=OrderObject.orderDown)
             ClientObject = Httpclient.PostRequest("GetUpdate", ClientObject.toJson())
+            # Check if there are a Clientobject:
             if ClientObject:
                 # Add an potential order to the orderlist:
                 OrderObject.AppendOrder(ClientObject)
@@ -129,6 +130,7 @@ def ButtonThread(RefreshRate = 0.1, PrintRate = 1):
                         KillLight(i, LampType.CallUp)
 
         # If the Client is not connected to a server, it works as a ordinary elevator:
+
         elif pressed and not ClientUDP.connected:
             floor, button, externalorder = pressed
             # Mutex to prevent concurrency:

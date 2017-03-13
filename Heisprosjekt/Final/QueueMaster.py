@@ -3,7 +3,7 @@ from json import dumps, loads
 from Timer import Timer
 from Costfunction import FastestElevator
 from TypeClasses import *
-from time import sleep
+
 
 
 
@@ -44,7 +44,7 @@ class QueueMaster(object):
         # If the client has a faulty state:
         if Client.currentState == ElevatorState.Error:
             self.Reprioritize(index)
-        self.PrintClientlist(RefreshRate=1)
+        #self.PrintClientlist(RefreshRate=1)
         # Update the ligthlist:
         self.clientlist[index].lightsUp = self.LightListUp
         self.clientlist[index].lightsDown = self.LightListDown

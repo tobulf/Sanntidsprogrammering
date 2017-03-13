@@ -9,6 +9,7 @@ def FastestElevator(Clientlist, Externalorder):
     Length = -1
     for i in range(len(Clientlist)):
         temp = GetLength(Clientlist[i].orderUp, Clientlist[i].orderDown, Clientlist[i].internalOrders, Clientlist[i].direction, Externalorder, Clientlist[i].position, Clientlist[i].currentState)
+        print temp
         # Only considers Clients that is connected:
         if Length == -1 and Clientlist[i].connected and Clientlist[i].currentState != ElevatorState.Error:
             Length = temp
@@ -42,9 +43,13 @@ def GetLength(QueueUp, QueueDown, InternalQueue, Direction, Order, Currentpositi
         # Merge the internal and external queue to one Queue:
         NewQueueUp = MergeQueue(QueueUp, InternalQueue, Currentposition, MotorDirection.DirnUp)
         return LengthUpToTarget(Currentposition, NewQueueUp, Order[0])
+
+    elif (Direction == MotorDirection.DirnStop or State == ElevatorState.Idle) and Order[0] == Currentposition:
+        return 0
+
     else:
         # Some fuckUp must have happened....
-        return 1000000
+        return 10000
 
 
 
