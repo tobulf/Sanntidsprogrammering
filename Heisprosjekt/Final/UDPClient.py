@@ -44,7 +44,7 @@ class UdpClient(object):
             pass
 
 
-    def Listen(self, TimeOut=0.01):
+    def Listen(self, TimeOut=0.1):
         try:
             data = self.client.recv(1024)
             # if there is nothing in the buffer it throws an exception an passes.

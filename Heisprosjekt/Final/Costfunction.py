@@ -84,12 +84,12 @@ def LengthUpToTarget(Position, Queue, Target, EndTarget = False):
         # Error handling in-case operator put in floors below 0
         try:
             if i == Target and Queue[i] and EndTarget and IsOrdersAbove(Queue, Position):
-                orders += 2
+                orders += 1
                 return orders + iterations - 1
             elif i == Target and not IsOrdersAbove(Queue, Position):
                 return orders + iterations - 1
             elif Queue[i]:
-                orders += 2
+                orders += 1
         except IndexError:
             # If we go out of index we return last:
             return orders + iterations
@@ -105,12 +105,12 @@ def LengthDownToTarget(Position, Queue, Target, EndTarget = False):
         # Adding som error handling in-case operator put in too big floor
         try:
             if i == Target and Queue[i] and EndTarget and IsOrdersBelow(Queue, Position):
-                orders += 2
+                orders += 1
                 return orders + iterations -1
             elif i == Target and not IsOrdersBelow(Queue, Position):
                 return orders + iterations -1
             elif Queue[i]:
-                orders += 2
+                orders += 1
         # If we go out of index we return last:
         except IndexError:
             return orders + iterations

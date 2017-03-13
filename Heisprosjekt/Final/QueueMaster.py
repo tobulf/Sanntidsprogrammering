@@ -44,7 +44,7 @@ class QueueMaster(object):
         # If the client has a faulty state:
         if Client.currentState == ElevatorState.Error:
             self.Reprioritize(index)
-        self.PrintClientlist(RefreshRate = 0.5)
+        self.PrintClientlist(RefreshRate=0.5)
         # Update the ligthlist:
         self.clientlist[index].lightsUp = self.LightListUp
         self.clientlist[index].lightsDown = self.LightListDown
