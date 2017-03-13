@@ -4,6 +4,7 @@ from BaseHTTPServer import HTTPServer
 class HttpServer(object):
     def __init__(self, address, port, RequestHandler):
         self.address = (address, port)
+        # Set up the server:
         self.server  = HTTPServer(self.address, RequestHandler)
         # Bool variable to break serve:
         self.serving = False

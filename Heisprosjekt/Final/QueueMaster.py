@@ -106,10 +106,10 @@ class QueueMaster(object):
         for i in range(self.floors-1):
             # Reprioritize Both orders UP and DOWN:
             if self.clientlist[Index].orderUp[i]:
-                order = [i, LampType.ButtonCallUp]
+                order = [i, LampType.CallUp]
                 self.PrioritizeOrder(order)
             if self.clientlist[Index].orderUp[i]:
-                order = [i, LampType.ButtonCallDown]
+                order = [i, LampType.CallDown]
                 self.PrioritizeOrder(order)
 
 
@@ -164,7 +164,7 @@ class QueueMaster(object):
         # Delete the order for the Client
         self.clientlist[Index].order = None
 
-        if Order[1] == Motor_direction.DIRN_DOWN:
+        if Order[1] == MotorDirection.DirnDown:
             self.LightListDown[Order[0]] = False
             self.clientlist[Index].orderDown[Order[0]] = False
             self.timerlist[Index].StopTimer()
@@ -177,7 +177,7 @@ class QueueMaster(object):
                 # Start timer
                 self.timerlist[Index].StartTimer()
 
-        elif Order[1] == Motor_direction.DIRN_UP:
+        elif Order[1] == MotorDirection.DirnUp:
             self.LightListUp[Order[0]] = False
             self.clientlist[Index].orderUp[Order[0]] = False
             #If the elevator is in the end, it should delete the oposite order.
@@ -191,7 +191,7 @@ class QueueMaster(object):
                 self.timerlist[Index].StartTimer()
 
 
-        elif Order[1] == Motor_direction.DIRN_STOP:
+        elif Order[1] == MotorDirection.DirnStop:
             self.LightListUp[Order[0]] = False
             self.LightListDown[Order[0]] = False
             self.clientlist[Index].orderUp[Order[0]] = False

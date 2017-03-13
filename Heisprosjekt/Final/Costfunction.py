@@ -21,24 +21,24 @@ def FastestElevator(Clientlist, Externalorder):
 
 
 def GetLength(QueueUp, QueueDown, InternalQueue, Direction, Order, Currentposition):
-    if Direction == Motor_direction.DIRN_DOWN and Order[0] < Currentposition:
+    if Direction == MotorDirection.DirnDown and Order[0] < Currentposition:
         # Merge the internal and external queue to one Queue:
         NewQueueDown = MergeQueue(QueueDown, InternalQueue, len(QueueDown) - 1, MotorDirection.DirnDown)
         return LengthDownToTarget(Currentposition, NewQueueDown, Order[0])
 
-    elif Direction == Motor_direction.DIRN_DOWN and Order[0] > Currentposition:
+    elif Direction == MotorDirection.DirnDown and Order[0] > Currentposition:
         # Merge the internal and external queue to one Queue:
         NewQueueUp = MergeQueue(QueueUp, InternalQueue, Currentposition, MotorDirection.DirnUp)
         NewQueueDown = MergeQueue(QueueDown, InternalQueue, len(QueueDown)-1, MotorDirection.DirnDown)
         return LengthUpToTarget(Currentposition, NewQueueUp, len(QueueUp)-1, EndTarget = True) + LengthDownToTarget(len(QueueUp)-1, NewQueueDown, Order[0])
 
-    elif Direction == Motor_direction.DIRN_UP and Order[0] < Currentposition:
+    elif Direction == MotorDirection.DirnUp and Order[0] < Currentposition:
         # Merge the internal and external queue to one Queue:
         NewQueueUp = MergeQueue(QueueUp, InternalQueue, Currentposition, MotorDirection.DirnUp)
         NewQueueDown = MergeQueue(QueueDown, InternalQueue, len(QueueDown) - 1, MotorDirection.DirnDown)
         return LengthUpToTarget(Currentposition, NewQueueUp, 0, EndTarget=True) + LengthDownToTarget(len(QueueDown), NewQueueDown, Order[0])
 
-    elif Direction == Motor_direction.DIRN_UP  and Order[0] > Currentposition:
+    elif Direction == MotorDirection.DirnUp  and Order[0] > Currentposition:
         # Merge the internal and external queue to one Queue:
         NewQueueUp = MergeQueue(QueueUp, InternalQueue, Currentposition, MotorDirection.DirnUp)
         return LengthUpToTarget(Currentposition, NewQueueUp, Order[0])
@@ -46,7 +46,7 @@ def GetLength(QueueUp, QueueDown, InternalQueue, Direction, Order, Currentpositi
 
 def MergeQueue(ExternalQueue, InternalQueue, From, Dir):
     # Merges 2 queues together element-vise, From a position, in a Direction til the end of the list in that direction.
-    if Dir == Motor_direction.DIRN_UP:
+    if Dir == MotorDirection.DirnUp:
         # iterate from From to end of the queue:
         for i in range(From, len(ExternalQueue)):
             # Error handling to make Fault tolerant
@@ -56,7 +56,7 @@ def MergeQueue(ExternalQueue, InternalQueue, From, Dir):
             except IndexError:
                 return ExternalQueue
         return ExternalQueue
-    elif Dir == Motor_direction.DIRN_DOWN:
+    elif Dir == MotorDirection.DirnDown:
         # Iterate from to 0
         for i in range(From, -1, -1):
             # Error handling to make Fault tolerant
