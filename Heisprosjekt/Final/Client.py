@@ -24,13 +24,13 @@ ClientObject = Client()
 ClientUDP = UdpServer(Port)
 RequestTimer = Timer()
 
+
 def ElevatorThread():
     elevator.Serve()
 
 def UDPThread():
     global Httpclient
     while True:
-        print ClientUDP.connected
         ClientUDP.Listen()
         # If the Client is disconnected and has no HttpConnection:
         if ClientUDP.connected and not Httpclient.connected:
@@ -46,12 +46,24 @@ def UDPThread():
             mutex.release()
 
 
-def ButtonThread(RefreshRate = 0.1):
+def ButtonThread(RefreshRate = 0.1, PrintRate = 1):
     # Declare an orderobject to keep control of orders:
     OrderObject = Order()
     # Declaring Buttonobject, to poll buttons:
     Buttons = ButtonObject()
+    printTimer = Timer()
+    printTimer.StartTimer()
     while True:
+        # Small print function to keep track of what state the elevator is in:
+        if printTimer.GetCurrentTime() > PrintRate:
+            printTimer.StartTimer()
+            if ClientUDP.connected:
+                print "___________________________________________"
+                print "Currently being served by: ", ClientUDP.ServerAddress
+            else:
+                print "___________________________________________"
+                print "Currently disconnected..."
+        # Everything starts with polling on the Buttons:
         pressed = Buttons.ButtonPressed()
         # Basicaly a statemachine for the Client:
         # Need some sort of thing for the client to tell that an order has been served.
