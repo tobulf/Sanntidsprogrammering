@@ -45,7 +45,7 @@ def UDPThread():
             mutex.release()
 
 
-def ButtonThread(RefreshRate = 0.3):
+def ButtonThread(RefreshRate = 0.1):
     # Declare an orderobject to keep control of orders:
     OrderObject = Order()
     # Declaring Buttonobject, to poll buttons:
@@ -55,6 +55,7 @@ def ButtonThread(RefreshRate = 0.3):
         # Basicaly a statemachine for the Client:
         # Need some sort of thing for the client to tell that an order has been served.
         if pressed and ClientUDP.connected:
+            RequestTimer.StartTimer()
             floor, button, externalorder = pressed
             if externalorder:
                 ClientObject = Client(Address=Address, Order=[floor, button], Direction=elevator.direction, Position = elevator.currentfloor, InternalOrders = elevator.InternalQueue, OrderCompleted = OrderObject.ExternalOrderServed(elevator.currentfloor, elevator.direction, elevator.currentstate))
@@ -137,6 +138,7 @@ def ButtonThread(RefreshRate = 0.3):
             mutex.release()
             
         elif not ClientUDP.connected:
+            RequestTimer.StopTimer()
             # Turn of all lights that are not in the orderList:
             for i in range(elevator.floors):
                 if not elevator.ExternalQueueUp[i]:

@@ -68,7 +68,7 @@ Handler = RequestHandler
 server  = HttpServer(IP, Port, Handler)
 server.serving = True
 
-def HTTPThread():
+def HTTPThread(RefreshRate = 0.1):
     global Queuemaster
     RequestTimer.StartTimer()
     while True:
@@ -83,7 +83,7 @@ def HTTPThread():
                 print "Error"
                 pass
         else:
-            if backupclient.connected and RequestTimer.GetCurrentTime() > 0.1:
+            if backupclient.connected and RequestTimer.GetCurrentTime() > RefreshRate:
                 # Reset the timer:
                 RequestTimer.StartTimer()
                 # Ask for backup:
