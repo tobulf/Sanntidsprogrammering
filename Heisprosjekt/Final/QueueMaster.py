@@ -73,10 +73,10 @@ class QueueMaster(object):
         # Adds the order to the Clients order List.
         print Order
         self.clientlist[priorityIndex].order = Order
-        if Order[1] == LampType.ButtonCallDown:
+        if Order[1] == LampType.CallDown:
             self.clientlist[priorityIndex].orderDown[Order[0]] = True
             self.LightListDown[Order[0]] = True
-        elif Order[1] == LampType.ButtonCallUp:
+        elif Order[1] == LampType.CallUp:
             self.clientlist[priorityIndex].orderUp[Order[0]] = True
             self.LightListUp[Order[0]] = True
         # Starts a timer to check if the given client serves the order.

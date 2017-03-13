@@ -94,7 +94,7 @@ def ButtonThread(RefreshRate = 0.3):
                 # Set the lights:
                 SetLigth(floor, LampType.Command)
 #
-        elif not pressed and ClientUDP.connected and RequestTimer.GetCurrentTime() > RefreshRate:
+        elif not pressed and ClientUDP.connected and (RequestTimer.GetCurrentTime() > RefreshRate or not RequestTimer.started):
             # Reset the Request-timer:
             RequestTimer.StartTimer()
             # Check if any orders ar served
