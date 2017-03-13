@@ -59,9 +59,10 @@ class Elevator(object):
                         self.currentstate = ElevatorState.Idle
 
                     else:
+                        print self.timer.started
                         # handles if the elevator is stuck at a floor:
                         if not self.timer.started and self.prevfloor == self.currentfloor:
-                            print "yea bro"
+                            #print "yea bro"
                             self.timer.StartTimer()
 
                         elif self.prevfloor != self.currentfloor:
