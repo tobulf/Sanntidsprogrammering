@@ -37,6 +37,8 @@ class Elevator(object):
     def Serve(self, TimeOut = 5):
         while True:
             # This is basicaly a state Machine for the elevator:
+            print self.currentstate
+            
             if self.currentstate == ElevatorState.Running:
                 # Using mutex to avoid Concurrency
                 self.currentfloor = self.elev.get_floor_sensor_signal()
@@ -64,6 +66,7 @@ class Elevator(object):
                     # When the elevator is between floors, a timer is started, if the elevator does not reach a new floor within 5 seconds its considered stuck:
                     if not self.timer.started:
                         self.timer.StartTimer()
+                    # If the elevator times out:
                     elif self.timer.GetCurrentTime() > TimeOut:
                         # elevator considers itself stuck and stops:
                         self.currentstate = ElevatorState.Error

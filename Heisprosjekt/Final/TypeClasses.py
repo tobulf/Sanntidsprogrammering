@@ -1,5 +1,6 @@
-# Classes containing Elevator button types, sort of like typedef:
 
+
+# Classes containing Elevator button types, sort of like typedef:
 
 class MotorDirection:
     DirnDown = -1
