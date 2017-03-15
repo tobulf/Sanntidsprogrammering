@@ -1,10 +1,20 @@
 from BaseHTTPServer import BaseHTTPRequestHandler
 from json import dumps
 from threading import Thread,Lock
-from HTTPServer import HttpServer
-from HTTPClient import HttpClient
+
 from Client import Client
+from HTTPServer import HttpServer
 from QueueMaster import QueueMaster
+
+from HTTPClient import HttpClient
+from TypeClasses import*
+from UDPClient  import UdpClient
+
+# Testing shit
+Bcast = "129.241.187.255"
+IP    = "129.241.187.143"
+Port  = 20010
+
 from UDPClient  import UdpClient
 import netifaces as FindIP
 from Timer import Timer
@@ -15,6 +25,7 @@ FindIP.ifaddresses('eth0')
 IP = FindIP.ifaddresses('eth0')[2][0]['addr']
 Bcast = FindIP.ifaddresses('eth0')[2][0]['broadcast']
 Port  = 20011
+
 
 
 # Declare the queuemasterobject for this server
@@ -77,6 +88,12 @@ def HTTPThread():
     RequestTimer.StartTimer()
     while True:
         if heartbeat.ServingServer:
+
+            # Serve request:
+            server.ServeOnce()
+            # Check for Timeouts
+            #queuemaster.CheckTimeout()
+
             RequestTimer.StopTimer()
             try:
                 # Serve request:
@@ -86,6 +103,7 @@ def HTTPThread():
             except AttributeError:
                 print "Error"
                 pass
+
         else:
             if backupclient.connected and RequestTimer.GetCurrentTime() > 0.1:
                 RequestTimer.StopTimer()

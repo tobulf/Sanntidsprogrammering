@@ -1,8 +1,16 @@
+
+from Heisprosjekt.Server.Client import Client
+
+from Sanntidsprogrammering.Heisprosjekt.Client.HTTPClient import HttpClient
+
+IP    = "129.241.187.150"
+
 from HTTPClient import HttpClient
 from Client import Client
 from json import dumps
 
 IP    = "129.241.187.156"
+
 Port  = 20010
 
 path = "basst"

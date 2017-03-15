@@ -57,7 +57,10 @@ class UdpClient(object):
                     self.timer.StopTimer()
 
             elif message[0] == "im alive" and not self.ServingServer:
-                # Store the other server address for backup:
+
+                # Store the other server adress for backup:
+
+
                 self.ServerAdress = message[1]
                 self.ServingServer = False
                 self.timer.StopTimer()
@@ -68,6 +71,11 @@ class UdpClient(object):
             elif self.timer.GetCurrentTime() > 1:
                 #if It has gone more than Three seconds it considers itself as the serving server
                 self.ServingServer = True
+
+                self.client.close()
+                self.client = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+
                 # stop timer:
+
                 self.timer.StopTimer()
             pass
