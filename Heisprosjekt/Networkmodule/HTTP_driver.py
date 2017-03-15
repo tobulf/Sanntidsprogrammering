@@ -3,8 +3,9 @@ import socket
 from httplib import HTTPConnection
 from json import dumps, loads
 
+from client import client
 
-
+# kk
 
 class HttpClient(object):
     def __init__(self, address, port):
@@ -13,8 +14,7 @@ class HttpClient(object):
         self.client    = HTTPConnection(address, port)
         # internal variable to check connection:
         self.connected = False
-
-
+    request.post(ip:port,data)
     def PostRequest(self, path, message):
         if self.connected:
             received = [0]
@@ -36,6 +36,7 @@ class HttpClient(object):
                 self.connected = False
                 pass
             return received
+
     def GetRequest(self, path):
         try:
                 self.client.connect()
