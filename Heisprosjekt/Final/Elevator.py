@@ -35,10 +35,11 @@ class Elevator(object):
         while self.elev.GetFloorSensorSignal() == -1:
             pass
         self.elev.SetMotordirection(MotorDirection.DirnStop)
-        self.OpenDoor()
+        
         # Current floor
         self.currentfloor = self.elev.GetFloorSensorSignal()
         self.prevfloor    = self.currentfloor
+        self.OpenDoor()
 
 
     def Serve(self, TimeOut = 5):
