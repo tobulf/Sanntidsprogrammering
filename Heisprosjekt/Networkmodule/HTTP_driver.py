@@ -3,6 +3,8 @@ import socket
 from httplib import HTTPConnection
 from json import dumps, loads
 
+from client import client
+
 
 
 class HttpClient(object):
