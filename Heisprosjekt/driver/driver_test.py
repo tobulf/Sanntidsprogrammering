@@ -1,14 +1,10 @@
-from driver import Driver
+from Elevator import Elevator
 from time import sleep
 
-elevator = Driver()
 
+elev = Elevator()
+elev.Queue[2] = True
+elev.OpenDoor()
 
-elevator.set_floor_indicator(0)
-while True:
-    print "k"
-    if elevator.get_buttonsignal(0,0):
-        sleep(0.5)
-        print
-
+print elev.IsOrdersAbove(-10)
 
